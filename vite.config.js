@@ -12,4 +12,10 @@ export default defineConfig({
   build: {
     minify: false, // Disables minification so LightningCSS never parses your CSS
   },
+  preview: {
+    allowedHosts: ["ecommerce-2026-client-production.up.railway.app"],
+  },
+  server: {
+    allowedHosts: ["ecommerce-2026-client-production.up.railway.app"],
+  },
 });

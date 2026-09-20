@@ -9,7 +9,7 @@ export default defineConfig({
       "@": path.resolve(import.meta.dirname, "./src"),
     },
   },
-  css: {
-    transformer: 'postcss',
+  build: {
+    minify: false, // Disables minification so LightningCSS never parses your CSS
   },
 });

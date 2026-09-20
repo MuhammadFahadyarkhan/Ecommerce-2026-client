@@ -12,7 +12,6 @@ import NotFound from './pages/NotFound'
 import ProductPage from './pages/ProductPage'
 import Checkout from './pages/Checkout'
 import Payment from './pages/Payment'
-import OrderProcessing from './pages/OrderProcessing'
 import Orders from './pages/Orders'
 import OrderPage from './pages/OrderPage'
 import AdminDashboard from './pages/AdminDashboard'
@@ -37,7 +36,6 @@ function App() {
     <Route path='/order/:id' element={isAuth ? <OrderPage /> : <Navigate to='/login' replace />} />
     <Route path='/checkout' element={isAuth ? <Checkout /> : <Navigate to='/login' replace />} />
     <Route path='/payment/:id' element={isAuth ? <Payment /> : <Navigate to='/login' replace />} />
-    <Route path='/ordersuccess' element={isAuth ? <OrderProcessing /> : <Navigate to='/login' replace />} />
     <Route path='*' element={<NotFound />} />
     <Route path='/login' element={isAuth?<Home /> : <Login />} />
     <Route path='/verify' element={isAuth?<Home /> :<Verify />} />

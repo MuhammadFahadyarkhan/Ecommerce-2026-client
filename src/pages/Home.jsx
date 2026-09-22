@@ -67,7 +67,7 @@ const Home = () => {
                 return (
                   <div
                     key={index}
-                    onClick={() => navigate("/products", { state: { category: catName } })}
+                    onClick={() => navigate(`/products?category=${encodeURIComponent(catName)}`)}
                     className="flex flex-col items-center flex-shrink-0 cursor-pointer group/item"
                   >
                     {/* Responsive Circular Image size */}

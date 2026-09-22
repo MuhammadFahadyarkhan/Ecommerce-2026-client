@@ -4,12 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { ProductData } from "@/context/ProductContext";
 import { Filter, X } from "lucide-react";
-import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import React, { useState } from "react";
 
 const Products = () => {
   const [show, setShow] = useState(false);
-  const location = useLocation();
   const {
     search,
     setSearch,
@@ -24,13 +22,6 @@ const Products = () => {
     products,
     loading,
   } = ProductData();
-
-  // Auto-select category if passed via router state from Home page
-  useEffect(() => {
-    if (location.state?.category) {
-      setCategory(location.state.category);
-    }
-  }, [location.state, setCategory]);
 
   const clearFilter = () => {
     setPrice("");

@@ -20,13 +20,17 @@ const logoutHandler = () => {
 
   return (
     <div className="z-50 sticky top-0 bg-white/70 dark:bg-zinc-950/70 border-b backdrop-blur-md">
-        <div className='container mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between '>
-         <div className="inline-flex items-center gap-1.5">
-  <h1 className="text-xl font-serif font-bold tracking-tight text-slate-900 dark:text-white">
-    Khalis Masala Shop
-  </h1>
-</div>
-         <ul className="flex justify-center items-center space-x-6">
+        <div className='container mx-auto px-6 py-3 flex flex-col sm:flex-row items-center justify-between'>
+          <div className="flex items-center">
+            {/* Increased height to h-28 with larger negative margins (-my-6) to make it much bigger without expanding the navbar */}
+            <img 
+              src="/logo.png" 
+              alt="Khalis Masala Shop" 
+              className="h-28 w-auto object-contain -my-6 cursor-pointer"
+              onClick={() => navigate("/")}
+            />
+          </div>
+         <ul className="flex justify-center items-center space-x-6 mt-3 sm:mt-0">
              <li className="cursor-pointer" onClick={() => navigate("/")}>Home</li>
              <li className="cursor-pointer" onClick={() => navigate("/products")}>Products</li>
              <li className="cursor-pointer relative flex items-center" onClick={() => navigate("/cart")}><ShoppingCart className='w-6 h-6 '/>
@@ -69,7 +73,7 @@ const logoutHandler = () => {
               </DropdownMenu>
              </li>
              <ModeToggle/>
-          </ul>
+         </ul>
         </div>
     </div>
   )

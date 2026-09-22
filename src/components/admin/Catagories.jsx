@@ -11,7 +11,7 @@ import Cookies from "js-cookie";
 import { server } from "@/main";
 
 const Catagories = () => {
-  const { categories: contextCategories, fetchCategories: refreshContextCategories } = ProductData();
+  const { fetchCategories: refreshContextCategories } = ProductData();
   
   const [categoriesWithImages, setCategoriesWithImages] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -19,37 +19,28 @@ const Catagories = () => {
   const [openModal, setOpenModal] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Fetch category objects to check for existing images and get their database _id
+  // Fetch only actual category documents from the database
   const fetchCategoryDetails = async () => {
     try {
       const { data } = await axios.get(`${server}/api/category/all`);
       const backendCategories = data.categories || data || [];
 
-      // Map through all known context categories to ensure nothing is left out
-      const mergedList = (contextCategories || []).map((catName) => {
-        const found = backendCategories.find(
-          (bc) => (typeof bc === "string" ? bc : bc.name)?.toLowerCase() === catName.toLowerCase()
-        );
+      const formattedList = backendCategories.map((bc) => ({
+        id: bc._id,
+        name: typeof bc === "string" ? bc : bc.name,
+        image: typeof bc === "object" ? bc.image?.url || null : null,
+      }));
 
-        return {
-          id: found && typeof found === "object" ? found._id : null,
-          name: catName,
-          image: found && typeof found === "object" ? found.image?.url || null : null,
-        };
-      });
-
-      setCategoriesWithImages(mergedList);
+      setCategoriesWithImages(formattedList);
     } catch (error) {
       console.log("Error fetching category details:", error);
-      setCategoriesWithImages((contextCategories || []).map((name) => ({ id: null, name, image: null })));
+      setCategoriesWithImages([]);
     }
   };
 
   useEffect(() => {
-    if (contextCategories && contextCategories.length > 0) {
-      fetchCategoryDetails();
-    }
-  }, [contextCategories]);
+    fetchCategoryDetails();
+  }, []);
 
   const handleFileChange = (e) => {
     setCategoryImage(e.target.files[0]);
@@ -90,13 +81,8 @@ const Catagories = () => {
     }
   };
 
-  // Handler to delete category without touching products
+  // Handler to delete category and immediately remove its card from UI
   const handleDeleteCategory = async (catId, catName) => {
-    if (!catId) {
-      toast.error("This category only exists via products and has no standalone record to delete.");
-      return;
-    }
-
     if (!window.confirm(`Are you sure you want to delete the category "${catName}"? Your products will remain safe.`)) {
       return;
     }
@@ -109,7 +95,10 @@ const Catagories = () => {
       });
 
       toast.success(data.message || "Category deleted successfully");
-      fetchCategoryDetails();
+      
+      // Immediately filter out the deleted category from local state so it vanishes instantly
+      setCategoriesWithImages((prev) => prev.filter((cat) => cat.id !== catId));
+      
       if (refreshContextCategories) refreshContextCategories();
     } catch (error) {
       console.log(error);
@@ -126,17 +115,15 @@ const Catagories = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {categoriesWithImages && categoriesWithImages.length > 0 ? (
           categoriesWithImages.map((cat, index) => (
-            <Card key={index} className="overflow-hidden flex flex-col justify-between relative group">
+            <Card key={cat.id || index} className="overflow-hidden flex flex-col justify-between relative group">
               {/* Delete Icon Button */}
-              {cat.id && (
-                <button
-                  onClick={() => handleDeleteCategory(cat.id, cat.name)}
-                  className="absolute top-2 right-2 z-10 bg-red-600/80 hover:bg-red-600 text-white p-1.5 rounded-full shadow-md transition-all"
-                  title="Delete Category"
-                >
-                  <Trash2 size={16} />
-                </button>
-              )}
+              <button
+                onClick={() => handleDeleteCategory(cat.id, cat.name)}
+                className="absolute top-2 right-2 z-10 bg-red-600/80 hover:bg-red-600 text-white p-1.5 rounded-full shadow-md transition-all"
+                title="Delete Category"
+              >
+                <Trash2 size={16} />
+              </button>
 
               <div className="h-40 bg-muted flex items-center justify-center relative">
                 {cat.image ? (

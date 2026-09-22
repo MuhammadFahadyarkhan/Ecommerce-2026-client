@@ -1,6 +1,7 @@
 import {BrowserRouter,Routes,Route,Navigate} from 'react-router-dom'
 import Home from './pages/Home'
 import Login from './pages/Login'
+import TopBar from './components/TopBar'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import { UserData } from "@/context/UserContext";
@@ -25,6 +26,7 @@ function App() {
     loading ? (<Loading />
     ) :(
      <BrowserRouter>
+   <TopBar />
    <Navbar />
    <Routes>
     <Route path='/' element={<Home />} />

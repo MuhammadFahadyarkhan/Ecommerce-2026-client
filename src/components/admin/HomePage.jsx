@@ -74,10 +74,15 @@ const HomePage = () => {
     }
 
     try {
-      // 1. If it's a new category, create it first with its optional image
-      if (isNewCategory) {
+      // 1. Check if the category already exists in your categories array
+      const categoryExists = categories.some(
+        (cat) => cat.toLowerCase() === formData.category.trim().toLowerCase()
+      );
+
+      // 2. Only create the category if it's marked as new and doesn't exist yet
+      if (isNewCategory && !categoryExists) {
         const catForm = new FormData();
-        catForm.append("name", formData.category);
+        catForm.append("name", formData.category.trim());
         if (formData.categoryImage) {
           catForm.append("files", formData.categoryImage);
         }
@@ -90,11 +95,11 @@ const HomePage = () => {
         });
       }
 
-      // 2. Now create the product
+      // 3. Now create the product
       const productForm = new FormData();
       productForm.append("title", formData.title);
       productForm.append("description", formData.description);
-      productForm.append("category", formData.category);
+      productForm.append("category", formData.category.trim());
       productForm.append("price", formData.price);
       productForm.append("stock", formData.stock);
 

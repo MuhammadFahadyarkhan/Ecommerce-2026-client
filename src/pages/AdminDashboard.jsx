@@ -1,3 +1,4 @@
+import Catagories from "@/components/admin/Catagories";
 import HomePage from "@/components/admin/HomePage";
 import OrdersPage from "@/components/admin/OrdersPage";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,9 @@ const AdminDashboard = () => {
 
       case "orders":
         return <OrdersPage />;
+
+      case "catagories":
+        return <Catagories />;
 
       default:
         return <HomePage />;

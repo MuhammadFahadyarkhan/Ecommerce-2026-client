@@ -12,12 +12,12 @@ const Hero = ({navigate}) => {
     >
       <div className="flex items-center justify-center h-full text-center text-white">
         <div>
-          <h1 className="text-4xl sm:text-6xl font-bold mb-6 drop-shadow-md">
+          {/* <h1 className="text-4xl sm:text-6xl font-bold mb-6 drop-shadow-md">
             Welcome to your Dream Shop
           </h1>
           <p className="text-lg sm:text-2xl mb-8 drop-shadow-md">
             Discover amazing products and deals just for you.
-          </p>
+          </p> */}
           <Button onClick={()=> navigate("/products")} size="lg">Shop Now</Button>
         </div>
       </div>

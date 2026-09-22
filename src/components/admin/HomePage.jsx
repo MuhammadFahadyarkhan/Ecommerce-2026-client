@@ -33,12 +33,12 @@ const HomePage = () => {
     price: "",
     stock: "",
     images: null,
+    categoryImage: null, // Category image for new categories
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     
-    // Check if user selected the "Add New Category" option from dropdown
     if (name === "categorySelect") {
       if (value === "add_new_custom") {
         setIsNewCategory(true);
@@ -56,11 +56,15 @@ const HomePage = () => {
     setFormData((prev) => ({ ...prev, images: e.target.files }));
   };
 
+  const handleCategoryImageChange = (e) => {
+    setFormData((prev) => ({ ...prev, categoryImage: e.target.files[0] }));
+  };
+
   const submitHandler = async (e) => {
     e.preventDefault();
     
     if (!formData.images || formData.images.length === 0) {
-      toast.error("Please select images");
+      toast.error("Please select product images");
       return;
     }
 
@@ -69,20 +73,36 @@ const HomePage = () => {
       return;
     }
 
-    const form = new FormData();
-
-    Object.entries(formData).forEach(([key, value]) => {
-      if (key === "images") {
-        for (let i = 0; i < value.length; i++) {
-          form.append("files", value[i]);
-        }
-      } else {
-        form.append(key, value);
-      }
-    });
-
     try {
-      const { data } = await axios.post(`${server}/api/product/new`, form, {
+      // 1. If it's a new category, create it first with its optional image
+      if (isNewCategory) {
+        const catForm = new FormData();
+        catForm.append("name", formData.category);
+        if (formData.categoryImage) {
+          catForm.append("files", formData.categoryImage);
+        }
+
+        await axios.post(`${server}/api/category/new`, catForm, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            token: Cookies.get("token"),
+          },
+        });
+      }
+
+      // 2. Now create the product
+      const productForm = new FormData();
+      productForm.append("title", formData.title);
+      productForm.append("description", formData.description);
+      productForm.append("category", formData.category);
+      productForm.append("price", formData.price);
+      productForm.append("stock", formData.stock);
+
+      for (let i = 0; i < formData.images.length; i++) {
+        productForm.append("files", formData.images[i]);
+      }
+
+      const { data } = await axios.post(`${server}/api/product/new`, productForm, {
         headers: {
           "Content-Type": "multipart/form-data",
           token: Cookies.get("token"),
@@ -99,6 +119,7 @@ const HomePage = () => {
         price: "",
         stock: "",
         images: null,
+        categoryImage: null,
       });
       fetchProducts();
     } catch (error) {
@@ -119,7 +140,7 @@ const HomePage = () => {
           <DialogTrigger />
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add New Product</DialogTitle>
+              <DialogTitle>Add New Product & Category</DialogTitle>
             </DialogHeader>
             
             <form onSubmit={submitHandler} className="space-y-4">
@@ -160,15 +181,26 @@ const HomePage = () => {
                 </select>
               </div>
 
-              {/* Conditional Input for New Category */}
+              {/* Conditional Input for New Category & Category Image */}
               {isNewCategory && (
-                <Input
-                  name="category"
-                  placeholder="Enter New Category Name"
-                  value={formData.category}
-                  onChange={handleChange}
-                  required
-                />
+                <div className="space-y-3 p-3 border rounded-md bg-muted/40">
+                  <label className="text-xs font-semibold">New Category Details</label>
+                  <Input
+                    name="category"
+                    placeholder="Enter New Category Name"
+                    value={formData.category}
+                    onChange={handleChange}
+                    required
+                  />
+                  <div className="space-y-1">
+                    <label className="text-xs text-muted-foreground">Category Image (Optional)</label>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleCategoryImageChange}
+                    />
+                  </div>
+                </div>
               )}
 
               <Input

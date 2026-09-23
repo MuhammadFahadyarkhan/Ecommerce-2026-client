@@ -15,6 +15,11 @@ export const ProductProvider = ({ children }) => {
   const [price, setPrice] = useState("");
   const [categories, setCategories] = useState([]);
 
+  // Auto-reset page to 1 whenever filters change
+  useEffect(() => {
+    setPage(1);
+  }, [search, category, price]);
+
   async function fetchProducts() {
     setLoading(true);
     try {
@@ -23,12 +28,23 @@ export const ProductProvider = ({ children }) => {
       );
       setProducts(data.products);
       setNewProd(data.newProduct);
-      setCategories(data.categories);
+      if (data.categories) setCategories(data.categories);
       setTotalPages(data.totalPages);
-      setLoading(false);
     } catch (error) {
       console.log(error);
+    } finally {
       setLoading(false);
+    }
+  }
+
+  async function fetchCategories() {
+    try {
+      const { data } = await axios.get(`${server}/api/category/all`);
+      const backendCategories = data.categories || data || [];
+      const formatted = backendCategories.map((bc) => (typeof bc === "string" ? bc : bc.name));
+      setCategories(formatted);
+    } catch (error) {
+      console.log("Error fetching categories:", error);
     }
   }
 
@@ -52,6 +68,10 @@ export const ProductProvider = ({ children }) => {
     fetchProducts();
   }, [search, category, page, price]);
 
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
   return (
     <ProductContext.Provider
       value={{
@@ -68,7 +88,8 @@ export const ProductProvider = ({ children }) => {
         setPrice,
         page,
         setPage,
-        fetchProducts, // <-- Added fetchProducts here!
+        fetchProducts,
+        fetchCategories,
         fetchProduct,
         product,
         relatedProduct,
@@ -79,4 +100,5 @@ export const ProductProvider = ({ children }) => {
   );
 };
 
+// <-- THIS EXPORT WAS MISSING, CAUSING THE MODULE SYNTAX ERROR
 export const ProductData = () => useContext(ProductContext);

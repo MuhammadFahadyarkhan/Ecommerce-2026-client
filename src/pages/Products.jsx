@@ -4,10 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { ProductData } from "@/context/ProductContext";
 import { Filter, X } from "lucide-react";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 
 const Products = () => {
   const [show, setShow] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  
   const {
     search,
     setSearch,
@@ -23,20 +26,41 @@ const Products = () => {
     loading,
   } = ProductData();
 
+  // 🔄 Sync URL Query Parameter to Context Category on mount or URL change
+  useEffect(() => {
+    const urlCategory = searchParams.get("category");
+    if (urlCategory) {
+      if (category !== urlCategory) {
+        setCategory(urlCategory);
+      }
+    } else {
+      if (category !== "") {
+        setCategory("");
+      }
+    }
+  }, [searchParams]);
+
+  // Handle manual category change from sidebar dropdown
+  const handleCategoryChange = (e) => {
+    const val = e.target.value;
+    setCategory(val);
+    if (val) {
+      setSearchParams({ category: val });
+    } else {
+      setSearchParams({});
+    }
+  };
+
   const clearFilter = () => {
     setPrice("");
     setCategory("");
     setSearch("");
     setPage(1);
+    setSearchParams({});
   };
 
-  const nextPage = () => {
-    setPage(page + 1);
-  };
-
-  const prevPage = () => {
-    setPage(page - 1);
-  };
+  const nextPage = () => setPage(page + 1);
+  const prevPage = () => setPage(page - 1);
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen">
@@ -80,7 +104,7 @@ const Products = () => {
             <select
               className="w-full p-2 border rounded-md dark:bg-gray-900 dark:text-white text-sm"
               value={category}
-              onChange={(e) => setCategory(e.target.value)}
+              onChange={handleCategoryChange}
             >
               <option value="">All</option>
               {categories.map((e) => (

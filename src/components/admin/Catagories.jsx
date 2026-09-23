@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Trash2 } from "lucide-react";
+import { Trash2, Edit } from "lucide-react";
 import toast from "react-hot-toast";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -15,6 +15,7 @@ const Catagories = () => {
   
   const [categoriesWithImages, setCategoriesWithImages] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [newName, setNewName] = useState("");
   const [categoryImage, setCategoryImage] = useState(null);
   const [openModal, setOpenModal] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -48,34 +49,37 @@ const Catagories = () => {
 
   const handleUpdateCategory = async (e) => {
     e.preventDefault();
-    if (!categoryImage) {
-      toast.error("Please select an image file");
+    if (!newName.trim()) {
+      toast.error("Category name cannot be empty");
       return;
     }
 
     try {
       setLoading(true);
       const formData = new FormData();
-      formData.append("name", selectedCategory.name);
-      formData.append("files", categoryImage);
+      formData.append("name", newName.trim());
+      if (categoryImage) {
+        formData.append("files", categoryImage);
+      }
 
-      const { data } = await axios.post(`${server}/api/category/new`, formData, {
+      // If category has a real database id, call PUT update route
+      const { data } = await axios.put(`${server}/api/category/${selectedCategory.id}`, formData, {
         headers: {
-          "Content-Type": "multipart/form-data",
           token: Cookies.get("token"),
         },
       });
 
-      toast.success(data.message || "Category image saved successfully!");
+      toast.success(data.message || "Category updated successfully!");
       setOpenModal(false);
       setCategoryImage(null);
       setSelectedCategory(null);
+      setNewName("");
       
       fetchCategoryDetails();
       if (refreshContextCategories) refreshContextCategories();
     } catch (error) {
       console.log(error);
-      toast.error(error.response?.data?.message || "Failed to save category image");
+      toast.error(error.response?.data?.message || "Failed to update category");
     } finally {
       setLoading(false);
     }
@@ -95,8 +99,6 @@ const Catagories = () => {
       });
 
       toast.success(data.message || "Category deleted successfully");
-      
-      // Immediately filter out the deleted category from local state so it vanishes instantly
       setCategoriesWithImages((prev) => prev.filter((cat) => cat.id !== catId));
       
       if (refreshContextCategories) refreshContextCategories();
@@ -125,7 +127,6 @@ const Catagories = () => {
                 <Trash2 size={16} />
               </button>
 
-              {/* Taller Image Container with object-contain to fit entire images */}
               <div className="w-full h-56 bg-gray-50 dark:bg-gray-900 relative overflow-hidden flex items-center justify-center p-2">
                 {cat.image ? (
                   <img 
@@ -141,12 +142,13 @@ const Catagories = () => {
               <CardContent className="p-4 flex flex-col gap-3">
                 <h3 className="font-semibold text-lg capitalize">{cat.name}</h3>
                 <Dialog 
-                  open={openModal && selectedCategory?.name === cat.name} 
+                  open={openModal && selectedCategory?.id === cat.id} 
                   onOpenChange={(isOpen) => {
                     setOpenModal(isOpen);
                     if (!isOpen) {
                       setSelectedCategory(null);
                       setCategoryImage(null);
+                      setNewName("");
                     }
                   }}
                 >
@@ -154,23 +156,35 @@ const Catagories = () => {
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      className="w-full"
-                      onClick={() => setSelectedCategory({ name: cat.name, image: cat.image })}
+                      className="w-full flex items-center gap-2"
+                      onClick={() => {
+                        setSelectedCategory(cat);
+                        setNewName(cat.name);
+                      }}
                     >
-                      {cat.image ? "Update Image" : "Add Image"}
+                      <Edit size={14} /> Edit Category
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>{cat.image ? `Update Image for "${cat.name}"` : `Add Image for "${cat.name}"`}</DialogTitle>
+                      <DialogTitle>Edit Category: "{cat.name}"</DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleUpdateCategory} className="space-y-4 pt-2">
                       <div className="space-y-2">
-                        <label className="text-sm font-medium">Select Category Image</label>
-                        <Input type="file" accept="image/*" onChange={handleFileChange} required />
+                        <label className="text-sm font-medium">Category Name</label>
+                        <Input 
+                          type="text" 
+                          value={newName} 
+                          onChange={(e) => setNewName(e.target.value)} 
+                          required 
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Update Image (Optional)</label>
+                        <Input type="file" accept="image/*" onChange={handleFileChange} />
                       </div>
                       <Button type="submit" className="w-full" disabled={loading}>
-                        {loading ? "Uploading..." : "Save Changes"}
+                        {loading ? "Saving..." : "Save Changes"}
                       </Button>
                     </form>
                   </DialogContent>

@@ -33,6 +33,22 @@ const Orders = () => {
     fetchOrders();
   }, []);
 
+  // Helper function to handle status text color dynamically
+  const getStatusTextColor = (status) => {
+    switch (status.toLowerCase()) {
+      case "pending":
+        return "text-yellow-500";
+      case "shipped":
+      case "delivered":
+        return "text-green-500";
+      case "rejected by seller":
+      case "rejected by buyer":
+        return "text-red-500";
+      default:
+        return "text-gray-500";
+    }
+  };
+
   if (loading) {
     return <Loading />;
   }
@@ -70,13 +86,7 @@ const Orders = () => {
               <CardContent className="p-0 space-y-1">
                 <p>
                   <strong>Status: </strong>
-                  <span
-                    className={` ${
-                      order.status.toLowerCase() === "pending"
-                        ? "text-yellow-500"
-                        : "text-green-500"
-                    }`}
-                  >
+                  <span className={`font-semibold ${getStatusTextColor(order.status)}`}>
                     {order.status}
                   </span>
                 </p>

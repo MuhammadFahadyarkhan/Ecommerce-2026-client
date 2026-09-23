@@ -57,6 +57,23 @@ const OrdersPage = () => {
       order._id.toLocaleLowerCase().includes(search.toLocaleLowerCase())
   );
 
+  // Helper function to handle badge styling colors based on order status
+  const getStatusBadgeColor = (status) => {
+    switch (status.toLowerCase()) {
+      case "pending":
+        return "bg-yellow-500";
+      case "shipped":
+        return "bg-blue-500";
+      case "delivered":
+        return "bg-green-500";
+      case "rejected by seller":
+      case "rejected by buyer":
+        return "bg-red-500";
+      default:
+        return "bg-gray-500";
+    }
+  };
+
   return (
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold">Manage Orders</h1>
@@ -87,19 +104,17 @@ const OrdersPage = () => {
               {filteredOrders.map((order) => (
                 <TableRow key={order._id}>
                   <TableCell>
-                    <Link to={`/order/${order._id}`}>{order._id}</Link>
+                    <Link to={`/order/${order._id}`} className="text-blue-600 hover:underline">
+                      {order._id}
+                    </Link>
                   </TableCell>
                   <TableCell>{order.user.email}</TableCell>
                   <TableCell>Rs {order.subTotal}</TableCell>
                   <TableCell>
                     <span
-                      className={`inline-block text-center w-28 px-2 py-1 rounded text-white ${
-                        order.status.toLowerCase() === "pending"
-                          ? "bg-yellow-500"
-                          : order.status.toLowerCase() === "shipped"
-                          ? "bg-blue-500"
-                          : "bg-green-500"
-                      }`}
+                      className={`inline-block text-center w-36 px-2 py-1 rounded text-white text-xs font-semibold ${getStatusBadgeColor(
+                        order.status
+                      )}`}
                     >
                       {order.status}
                     </span>
@@ -110,12 +125,14 @@ const OrdersPage = () => {
                   <TableCell>
                     <select
                       value={order.status}
-                      className="w-[150px] px-3 py-2 border rounded-md bg-white dark:bg-black text-gray-900 dark:text-white border-gray-200 dark:border-gray-800"
+                      className="w-[170px] px-3 py-2 border rounded-md bg-white dark:bg-black text-gray-900 dark:text-white border-gray-200 dark:border-gray-800 text-sm"
                       onChange={(e) => updateOrderStatus(order._id, e.target.value)}
                     >
                       <option value="Pending">Pending</option>
                       <option value="Shipped">Shipped</option>
                       <option value="Delivered">Delivered</option>
+                      <option value="Rejected by Seller">Rejected by Seller</option>
+                      <option value="Rejected by Buyer">Rejected by Buyer</option>
                     </select>
                   </TableCell>
                 </TableRow>

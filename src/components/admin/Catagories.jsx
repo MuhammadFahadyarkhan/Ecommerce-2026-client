@@ -115,7 +115,7 @@ const Catagories = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {categoriesWithImages && categoriesWithImages.length > 0 ? (
           categoriesWithImages.map((cat, index) => (
-            <Card key={cat.id || index} className="overflow-hidden flex flex-col justify-between relative group">
+            <Card key={cat.id || index} className="overflow-hidden flex flex-col justify-between relative group shadow-sm hover:shadow-md transition-shadow">
               {/* Delete Icon Button */}
               <button
                 onClick={() => handleDeleteCategory(cat.id, cat.name)}
@@ -125,18 +125,18 @@ const Catagories = () => {
                 <Trash2 size={16} />
               </button>
 
-              {/* Image Container with Fit Fix */}
-             <div className="w-full h-36 bg-gray-100 dark:bg-gray-900 relative overflow-hidden flex items-center justify-center">
-  {cat.image ? (
-    <img 
-      src={cat.image} 
-      alt={cat.name} 
-      className="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105" 
-    />
-  ) : (
-    <span className="text-sm text-muted-foreground">No Image</span>
-  )}
-</div>
+              {/* Taller Image Container with object-contain to fit entire images */}
+              <div className="w-full h-56 bg-gray-50 dark:bg-gray-900 relative overflow-hidden flex items-center justify-center p-2">
+                {cat.image ? (
+                  <img 
+                    src={cat.image} 
+                    alt={cat.name} 
+                    className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105" 
+                  />
+                ) : (
+                  <span className="text-sm text-muted-foreground">No Image</span>
+                )}
+              </div>
 
               <CardContent className="p-4 flex flex-col gap-3">
                 <h3 className="font-semibold text-lg capitalize">{cat.name}</h3>

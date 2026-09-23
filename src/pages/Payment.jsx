@@ -73,13 +73,12 @@ const Payment = () => {
         formData.append("address", address.address);
         formData.append("files", proofFile); // 👈 Matches multer .array("files", 10)
 
-        const { data } = await axios.post(
+     const { data } = await axios.post(
           `${server}/api/order/new/proof`, 
           formData, 
           {
             headers: {
               token: Cookies.get("token"),
-              "Content-Type": "multipart/form-data",
             },
           }
         );

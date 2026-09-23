@@ -53,12 +53,12 @@ const OrdersPage = () => {
 
   const filteredOrders = orders.filter(
     (order) =>
-      order.user.email.toLowerCase().includes(search.toLocaleLowerCase()) ||
-      order._id.toLocaleLowerCase().includes(search.toLocaleLowerCase())
+      order.user?.email?.toLowerCase().includes(search.toLocaleLowerCase()) ||
+      order._id?.toLocaleLowerCase().includes(search.toLocaleLowerCase())
   );
 
   const getStatusBadgeColor = (status) => {
-    switch (status.toLowerCase()) {
+    switch (status?.toLowerCase()) {
       case "pending":
         return "bg-yellow-500";
       case "awaiting admin approval":
@@ -110,7 +110,7 @@ const OrdersPage = () => {
                       {order._id}
                     </Link>
                   </TableCell>
-                  <TableCell>{order.user.email}</TableCell>
+                  <TableCell>{order.user?.email || "N/A"}</TableCell>
                   <TableCell>
                     Rs {order.subTotal} 
                     {order.paymentProof && <span className="block text-xs text-amber-600 font-semibold">(25%: Rs {order.subTotal * 0.25})</span>}

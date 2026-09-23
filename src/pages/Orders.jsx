@@ -58,7 +58,6 @@ const Orders = () => {
         {
           headers: {
             token: Cookies.get("token"),
-            "Content-Type": "multipart/form-data",
           },
         }
       );
@@ -73,7 +72,7 @@ const Orders = () => {
   };
 
   const getStatusTextColor = (status) => {
-    switch (status.toLowerCase()) {
+    switch (status?.toLowerCase()) {
       case "pending":
       case "awaiting admin approval":
         return "text-yellow-500";

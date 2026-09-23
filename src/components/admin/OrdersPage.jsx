@@ -95,7 +95,7 @@ const OrdersPage = () => {
               <TableRow>
                 <TableHead>Order Id</TableHead>
                 <TableHead>User Email</TableHead>
-                <TableHead>Total / 25% Advance</TableHead>
+                <TableHead>Total / Remaining Due</TableHead>
                 <TableHead>Payment Proof</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Date</TableHead>
@@ -113,7 +113,13 @@ const OrdersPage = () => {
                   <TableCell>{order.user?.email || "N/A"}</TableCell>
                   <TableCell>
                     Rs {order.subTotal} 
-                    {order.paymentProof && <span className="block text-xs text-amber-600 font-semibold">(25%: Rs {order.subTotal * 0.25})</span>}
+                    {order.paymentProof ? (
+                      <span className="block text-xs text-green-600 font-semibold">
+                        Due on Delivery: Rs {(order.subTotal * 0.75).toFixed(2)}
+                      </span>
+                    ) : (
+                      <span className="block text-xs text-amber-600 font-semibold">(25% Advance: Rs {(order.subTotal * 0.25).toFixed(2)})</span>
+                    )}
                   </TableCell>
                   <TableCell>
                     {order.paymentProof ? (

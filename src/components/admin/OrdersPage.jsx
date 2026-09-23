@@ -57,13 +57,14 @@ const OrdersPage = () => {
       order._id.toLocaleLowerCase().includes(search.toLocaleLowerCase())
   );
 
-  // Helper function to handle badge styling colors based on order status
   const getStatusBadgeColor = (status) => {
     switch (status.toLowerCase()) {
       case "pending":
         return "bg-yellow-500";
+      case "awaiting admin approval":
+        return "bg-amber-500";
+      case "approved":
       case "shipped":
-        return "bg-blue-500";
       case "delivered":
         return "bg-green-500";
       case "rejected by seller":
@@ -94,7 +95,8 @@ const OrdersPage = () => {
               <TableRow>
                 <TableHead>Order Id</TableHead>
                 <TableHead>User Email</TableHead>
-                <TableHead>Total</TableHead>
+                <TableHead>Total / 25% Advance</TableHead>
+                <TableHead>Payment Proof</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Action</TableHead>
@@ -109,10 +111,27 @@ const OrdersPage = () => {
                     </Link>
                   </TableCell>
                   <TableCell>{order.user.email}</TableCell>
-                  <TableCell>Rs {order.subTotal}</TableCell>
+                  <TableCell>
+                    Rs {order.subTotal} 
+                    {order.paymentProof && <span className="block text-xs text-amber-600 font-semibold">(25%: Rs {order.subTotal * 0.25})</span>}
+                  </TableCell>
+                  <TableCell>
+                    {order.paymentProof ? (
+                      <a 
+                        href={order.paymentProof} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-blue-500 underline text-xs font-medium"
+                      >
+                        View Proof
+                      </a>
+                    ) : (
+                      <span className="text-gray-400 text-xs">COD</span>
+                    )}
+                  </TableCell>
                   <TableCell>
                     <span
-                      className={`inline-block text-center w-36 px-2 py-1 rounded text-white text-xs font-semibold ${getStatusBadgeColor(
+                      className={`inline-block text-center px-2 py-1 rounded text-white text-xs font-semibold ${getStatusBadgeColor(
                         order.status
                       )}`}
                     >
@@ -129,6 +148,8 @@ const OrdersPage = () => {
                       onChange={(e) => updateOrderStatus(order._id, e.target.value)}
                     >
                       <option value="Pending">Pending</option>
+                      <option value="Awaiting Admin Approval">Awaiting Admin Approval</option>
+                      <option value="Approved">Approved</option>
                       <option value="Shipped">Shipped</option>
                       <option value="Delivered">Delivered</option>
                       <option value="Rejected by Seller">Rejected by Seller</option>

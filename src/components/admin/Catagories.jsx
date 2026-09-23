@@ -125,13 +125,19 @@ const Catagories = () => {
                 <Trash2 size={16} />
               </button>
 
-              <div className="h-40 bg-muted flex items-center justify-center relative">
-                {cat.image ? (
-                  <img src={cat.image} alt={cat.name} className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-sm text-muted-foreground">No Image</span>
-                )}
-              </div>
+              {/* Image Container with Fit Fix */}
+             <div className="w-full h-36 bg-gray-100 dark:bg-gray-900 relative overflow-hidden flex items-center justify-center">
+  {cat.image ? (
+    <img 
+      src={cat.image} 
+      alt={cat.name} 
+      className="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105" 
+    />
+  ) : (
+    <span className="text-sm text-muted-foreground">No Image</span>
+  )}
+</div>
+
               <CardContent className="p-4 flex flex-col gap-3">
                 <h3 className="font-semibold text-lg capitalize">{cat.name}</h3>
                 <Dialog 

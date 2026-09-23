@@ -121,9 +121,14 @@ const OrdersPage = () => {
                         href={order.paymentProof} 
                         target="_blank" 
                         rel="noopener noreferrer" 
-                        className="text-blue-500 underline text-xs font-medium"
+                        className="block group"
+                        title="Click to view full image"
                       >
-                        View Proof
+                        <img 
+                          src={order.paymentProof} 
+                          alt="Payment Proof" 
+                          className="w-12 h-12 object-cover rounded-md border border-gray-300 group-hover:opacity-80 transition-opacity" 
+                        />
                       </a>
                     ) : (
                       <span className="text-gray-400 text-xs">COD</span>

@@ -1,43 +1,83 @@
 import Loading from "@/components/Loading";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { server } from "@/main";
 import axios from "axios";
 import Cookies from "js-cookie";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [proofFiles, setProofFiles] = useState({});
+  const [uploadingId, setUploadingId] = useState(null);
 
   const navigate = useNavigate();
 
+  const fetchOrders = async () => {
+    try {
+      const { data } = await axios.get(`${server}/api/order/all`, {
+        headers: {
+          token: Cookies.get("token"),
+        },
+      });
+
+      setOrders(data.orders);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const { data } = await axios.get(`${server}/api/order/all`, {
-          headers: {
-            token: Cookies.get("token"),
-          },
-        });
-
-        setOrders(data.orders);
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchOrders();
   }, []);
 
-  // Helper function to handle status text color dynamically
+  const handleFileChange = (orderId, file) => {
+    setProofFiles((prev) => ({ ...prev, [orderId]: file }));
+  };
+
+  const handleUploadProof = async (orderId) => {
+    const file = proofFiles[orderId];
+    if (!file) {
+      return toast.error("Please select a payment screenshot first");
+    }
+
+    setUploadingId(orderId);
+    try {
+      const formData = new FormData();
+      formData.append("files", file);
+
+      const { data } = await axios.put(
+        `${server}/api/order/${orderId}/proof`,
+        formData,
+        {
+          headers: {
+            token: Cookies.get("token"),
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      toast.success(data.message || "Payment proof uploaded successfully!");
+      fetchOrders();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to upload payment proof");
+    } finally {
+      setUploadingId(null);
+    }
+  };
+
   const getStatusTextColor = (status) => {
     switch (status.toLowerCase()) {
       case "pending":
+      case "awaiting admin approval":
         return "text-yellow-500";
+      case "approved":
       case "shipped":
       case "delivered":
         return "text-green-500";
@@ -73,42 +113,78 @@ const Orders = () => {
             date.getMonth() + 1
           ).padStart(2, "0")}/${date.getFullYear()}`;
 
+          const isRejected = order.status?.toLowerCase().includes("rejected");
+          const isCodWithoutProof = order.method?.toLowerCase() === "cod" && !order.paymentProof && !isRejected;
+          const advanceAmount = (order.subTotal * 0.25).toFixed(2);
+
           return (
             <Card
               key={order._id}
-              className="border border-slate-200 shadow-sm hover:shadow-lg transition-shadow duration-200 p-6 outline-none ring-0 focus:ring-0"
+              className="border border-slate-200 shadow-sm hover:shadow-lg transition-shadow duration-200 p-6 outline-none ring-0 focus:ring-0 flex flex-col justify-between"
             >
-              <CardHeader className="p-0 pb-4">
-                <CardTitle className="text-lg font-normal">
-                  Order #{order._id.toUpperCase()}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0 space-y-1">
-                <p>
-                  <strong>Status: </strong>
-                  <span className={`font-semibold ${getStatusTextColor(order.status)}`}>
-                    {order.status}
-                  </span>
-                </p>
-                <p>
-                  <strong>Total Items: </strong>
-                  {order.items.length}
-                </p>
-                <p>
-                  <strong>SubTotal: </strong>
-                  {order.subTotal}
-                </p>
-                <p>
-                  <strong>Placed At: </strong>
-                  {formattedDate}
-                </p>
-                <Button
-                  className="mt-4 outline-none ring-0 focus:ring-0 focus-visible:ring-0"
-                  onClick={() => navigate(`/order/${order._id}`)}
-                >
-                  View Details
-                </Button>
-              </CardContent>
+              <div>
+                <CardHeader className="p-0 pb-4">
+                  <CardTitle className="text-lg font-normal">
+                    Order #{order._id.toUpperCase()}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0 space-y-1">
+                  <p>
+                    <strong>Method: </strong> {order.method}
+                  </p>
+                  <p>
+                    <strong>Status: </strong>
+                    <span className={`font-semibold ${getStatusTextColor(order.status)}`}>
+                      {order.status}
+                    </span>
+                  </p>
+                  <p>
+                    <strong>Total Items: </strong> {order.items.length}
+                  </p>
+                  <p>
+                    <strong>SubTotal: </strong> Rs {order.subTotal}
+                  </p>
+                  <p>
+                    <strong>Placed At: </strong> {formattedDate}
+                  </p>
+
+                  {/* COD Upgrade Option (Hidden if rejected) */}
+                  {isCodWithoutProof && (
+                    <div className="mt-4 p-3 border border-amber-200 bg-amber-50 dark:bg-amber-950/20 rounded-lg space-y-2">
+                      <p className="text-xs font-medium text-amber-900 dark:text-amber-200">
+                        Want 25% Advance? Transfer <strong>Rs {advanceAmount}</strong> and upload screenshot:
+                      </p>
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleFileChange(order._id, e.target.files[0])}
+                        className="bg-white dark:bg-gray-900 text-xs h-9"
+                      />
+                      <Button
+                        size="sm"
+                        className="w-full mt-1 bg-amber-600 hover:bg-amber-700 text-white"
+                        disabled={uploadingId === order._id}
+                        onClick={() => handleUploadProof(order._id)}
+                      >
+                        {uploadingId === order._id ? "Uploading..." : "Upload 25% Proof"}
+                      </Button>
+                    </div>
+                  )}
+
+                  {order.paymentProof && (
+                    <div className="mt-2 text-xs">
+                      <span className="font-semibold text-green-600">Payment Proof Submitted</span>
+                    </div>
+                  )}
+                </CardContent>
+              </div>
+
+              <Button
+                className="mt-6 outline-none ring-0 focus:ring-0 focus-visible:ring-0 w-full"
+                onClick={() => navigate(`/order/${order._id}`)}
+              >
+                View Details
+              </Button>
             </Card>
           );
         })}

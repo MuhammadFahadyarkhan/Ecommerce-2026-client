@@ -109,11 +109,11 @@ const Home = () => {
 
       <div className="top products mt-4 p-4">
         <div className="inline-flex items-center gap-1.5">
-          <h1 className="text-xl font-serif font-bold tracking-tight text-slate-900 dark:text-white pl-3">
+          <h1 className="text-xl font-serif font-bold tracking-tight text-slate-900 dark:text-white pl-3 mt-3">
             Latest Products
           </h1>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mt-7">
           {newProd && newProd.length > 0 ? (
             newProd.map((e) => {
               return <ProductCard key={e._id} product={e} latest={"yes"} />;

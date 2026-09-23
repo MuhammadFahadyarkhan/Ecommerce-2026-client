@@ -15,14 +15,12 @@ import toast from "react-hot-toast";
 import { useParams, useNavigate } from "react-router-dom";
 import { X, Edit, Loader, Trash2 } from "lucide-react";
 
-
 const ProductPage = () => {
   const { fetchProduct, fetchProducts, product, relatedProduct, loading } = ProductData();
-  const { addToCart,fetchCart } = CartData();
+  const { addToCart, fetchCart } = CartData();
   const { id } = useParams();
   const { isAuth, user } = UserData();
   const navigate = useNavigate();
-  
 
   // Categories list for the select dropdown
   const categories = ["Electronics", "Clothing", "Books", "Home", "Other"];
@@ -114,7 +112,7 @@ const ProductPage = () => {
     }
   };
 
-const deleteHandler = async () => {
+  const deleteHandler = async () => {
     if (window.confirm("Are you sure you want to delete this product?")) {
       setBtnLoading(true);
       try {
@@ -125,7 +123,6 @@ const deleteHandler = async () => {
         });
         toast.success(data.message);
         
-        // Refresh global products list and update navbar cart badge immediately
         await fetchProducts();
         
         try {
@@ -231,7 +228,7 @@ const deleteHandler = async () => {
           )}
 
           {product && (
-            <div className="flex flex-col lg:flex-row items-start gap-8 lg:gap-14">
+            <div className="flex flex-col lg:flex-row items-start gap-8 lg:gap-14 mt-7">
               <div className="w-full lg:max-w-[650px]">
                 <Carousel>
                   <CarouselContent>
@@ -267,20 +264,35 @@ const deleteHandler = async () => {
                 )}
               </div>
 
-              <div className="w-full lg:w-1/2 space-y-4">
-                <h1 className="text-2xl font-bold">{product.title}</h1>
-                <p className="text-lg">{product.description}</p>
-                <p className="text-xl font-semibold">₨ {product.price}</p>
+              <div className="w-full lg:w-1/2 space-y-5">
+                {product.category && (
+                  <span className="inline-block text-xs font-semibold tracking-wider uppercase px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                    {product.category}
+                  </span>
+                )}
+
+                <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">{product.title}</h1>
+                
+                <p className="text-lg font-semibold text-slate-800 dark:text-slate-200">₨ {product.price}</p>
+
+                {/* Prominent Description Box */}
+                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2">
+                  <h3 className="text-xs font-bold tracking-wider uppercase text-slate-500 dark:text-slate-400">Product Description</h3>
+                  <p className="text-sm sm:text-base leading-relaxed text-slate-700 dark:text-slate-300">
+                    {product.description}
+                  </p>
+                </div>
+
                 {isAuth ? (
                   <>
                     {product.stock <= 0 ? (
-                      <p className="text-red-600 text-2xl">Out of Stock</p>
+                      <p className="text-red-600 text-xl font-semibold">Out of Stock</p>
                     ) : (
                       <Button onClick={addToCartHandler}>Add To Cart</Button>
                     )}
                   </>
                 ) : (
-                  <p className="text-blue-500">Please Login to add something in cart</p>
+                  <p className="text-blue-500 text-sm">Please Login to add something in cart</p>
                 )}
               </div>
             </div>

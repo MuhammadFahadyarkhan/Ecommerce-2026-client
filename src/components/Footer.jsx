@@ -18,19 +18,15 @@ const Footer = () => {
             </div>
           </div>
           <div className="flex flex-wrap items-center justify-center md:justify-end gap-4">
-           
+            
             <a 
               href="https://wa.me/923062300042?text=Hello,%20I%20want%20to%20order%20from%20Khalis%20Masala%20Shop." 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="flex items-center gap-2.5 px-4 py-2.5 rounded-lg bg-green-600 hover:bg-green-700 text-white transition-colors shadow-sm text-sm font-medium"
+              className="w-12 h-12 rounded-full bg-green-600 hover:bg-green-700 text-white flex items-center justify-center transition-colors shadow-sm"
               aria-label="WhatsApp Order"
             >
-              <FaWhatsapp size={20} />
-              <div className="text-left">
-                <p className="text-[10px] uppercase tracking-wider text-green-100 leading-none">WhatsApp Order</p>
-                <p className="text-sm font-bold tracking-wide">03062300042</p>
-              </div>
+              <FaWhatsapp size={24} />
             </a>
           </div>
         </div>

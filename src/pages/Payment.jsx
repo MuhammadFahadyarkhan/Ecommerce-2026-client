@@ -73,12 +73,14 @@ const Payment = () => {
         formData.append("address", address.address);
         formData.append("files", proofFile); // 👈 Matches multer .array("files", 10)
 
-     const { data } = await axios.post(
+        const { data } = await axios.post(
           `${server}/api/order/new/proof`, 
           formData, 
           {
             headers: {
               token: Cookies.get("token"),
+              // NOTE: Do NOT manually set "Content-Type": "multipart/form-data" here. 
+              // Leaving it out allows Axios to automatically inject the correct multipart boundary string.
             },
           }
         );
@@ -217,8 +219,13 @@ const Payment = () => {
               </div>
             )}
 
+            {/* Delivery Charges Notice */}
+            <div className="p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-md text-xs text-blue-800 dark:text-blue-200 text-center font-medium">
+              ℹ️ Delivery Charges will be told on the confirmation call.
+            </div>
+
             <Button
-              className="w-full py-3 mt-4"
+              className="w-full py-3 mt-2"
               onClick={paymentHandler}
               disabled={!address}
             >

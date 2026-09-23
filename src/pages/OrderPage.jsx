@@ -39,6 +39,9 @@ const OrderPage = () => {
     switch (status.toLowerCase()) {
       case "pending":
         return "text-yellow-500";
+      case "awaiting admin approval":
+        return "text-amber-500";
+      case "approved":
       case "shipped":
       case "delivered":
         return "text-green-500";
@@ -106,8 +109,17 @@ const OrderPage = () => {
               </p>
               <p>
                 <strong>SubTotal: </strong>
-                {order.subTotal}
+                Rs {order.subTotal}
               </p>
+              
+              {/* Show Advance Breakdown if payment proof exists */}
+              {order.paymentProof && (
+                <p className="text-amber-600 font-medium">
+                  <strong>25% Advance Paid: </strong> Rs {(order.subTotal * 0.25).toFixed(2)} 
+                  <span className="block text-xs text-gray-500">Remaining Due on Delivery: Rs {(order.subTotal * 0.75).toFixed(2)}</span>
+                </p>
+              )}
+
               <p>
                 <strong>Placed At: </strong>
                 {formattedDate}
@@ -118,14 +130,37 @@ const OrderPage = () => {
               </p>
             </div>
 
-            {/* Right Column: Shipping & User Info */}
-            <div className="space-y-2">
+            {/* Right Column: Shipping, User Info & Payment Proof Image */}
+            <div className="space-y-3">
               <p>
                 <strong>Address: </strong> {order.address}
               </p>
               <p>
                 <strong>User: </strong> {order.user?.email || "Guest"}
               </p>
+
+              {/* Payment Proof Image Preview for Print / View */}
+              {order.paymentProof ? (
+                <div className="pt-2">
+                  <strong className="block mb-1">Payment Proof Screenshot:</strong>
+                  <a 
+                    href={order.paymentProof} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-block"
+                  >
+                    <img 
+                      src={order.paymentProof} 
+                      alt="Payment Proof" 
+                      className="w-24 h-24 object-cover rounded-md border border-gray-300 shadow-sm hover:opacity-90 transition-opacity" 
+                    />
+                  </a>
+                </div>
+              ) : (
+                <p>
+                  <strong>Payment Proof: </strong> <span className="text-gray-400">None (Pure COD)</span>
+                </p>
+              )}
             </div>
           </div>
         </CardContent>

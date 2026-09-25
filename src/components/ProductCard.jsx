@@ -1,9 +1,13 @@
 import React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button } from './ui/button'
+import { ShoppingCart } from 'lucide-react'
+import { CartData } from '@/context/CartContext'
 
 const ProductCard = ({ product }) => {
     const navigate = useNavigate()
+    const { addToCart } = CartData()
+
     return (
         <div>
             {
@@ -35,9 +39,22 @@ const ProductCard = ({ product }) => {
                                 <div className="text-sm font-bold text-slate-900 dark:text-white">
                                     ₨ {product.price}
                                 </div>
-                                <Button onClick={() => navigate(`/product/${product._id}`)}>
-                                    View Product
-                                </Button>
+                                
+                                <div className="flex items-center gap-2">
+                                    {/* Circular Add to Cart Button */}
+                                    <button 
+                                        onClick={() => addToCart(product)}
+                                        className="w-9 h-9 rounded-full bg-green-600 hover:bg-green-700 text-white flex items-center justify-center transition-colors shadow-sm"
+                                        aria-label="Add to Cart"
+                                    >
+                                        <ShoppingCart size={16} />
+                                    </button>
+
+                                    {/* View Product Button */}
+                                    <Button onClick={() => navigate(`/product/${product._id}`)}>
+                                        View Product
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -13,16 +13,15 @@ import Cookies from "js-cookie";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useParams, useNavigate } from "react-router-dom";
-import { X, Edit, Loader, Trash2 } from "lucide-react";
+import { X, Edit, Loader, Trash2, Star } from "lucide-react";
 
 const ProductPage = () => {
-  const { fetchProduct, fetchProducts, product, relatedProduct, loading } = ProductData();
+  const { fetchProduct, fetchProducts, product, relatedProduct, reviews, reviewStats, loading } = ProductData();
   const { addToCart, fetchCart } = CartData();
   const { id } = useParams();
   const { isAuth, user } = UserData();
   const navigate = useNavigate();
 
-  // Categories list for the select dropdown
   const categories = ["Electronics", "Clothing", "Books", "Home", "Other"];
 
   useEffect(() => {
@@ -41,6 +40,21 @@ const ProductPage = () => {
   const [category, setCategory] = useState("");
   const [btnLoading, setBtnLoading] = useState(false);
   const [updatedImages, setUpdatedImages] = useState(null);
+
+  // Review Modal & Form States
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewName, setReviewName] = useState(user?.name || "");
+  const [reviewEmail, setReviewEmail] = useState(user?.email || "");
+  const [reviewNickname, setReviewNickname] = useState("");
+  const [reviewLocation, setReviewLocation] = useState("");
+  const [overallRating, setOverallRating] = useState(0);
+  const [qualityRating, setQualityRating] = useState(0);
+  const [deliveryRating, setDeliveryRating] = useState(0);
+  const [serviceRating, setServiceRating] = useState(0);
+  const [recommend, setRecommend] = useState("Yes");
+  const [reviewTitle, setReviewTitle] = useState("");
+  const [reviewComment, setReviewComment] = useState("");
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
 
   const updateHandler = () => {
     setShow(!show);
@@ -88,7 +102,6 @@ const ProductPage = () => {
     }
 
     const formData = new FormData();
-
     for (let i = 0; i < updatedImages.length; i++) {
       formData.append("files", updatedImages[i]);
     }
@@ -140,8 +153,77 @@ const ProductPage = () => {
     }
   };
 
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (!isAuth) {
+      toast.error("Please login to write a review");
+      return;
+    }
+    if (overallRating === 0) {
+      toast.error("Please provide an overall rating");
+      return;
+    }
+
+    setReviewSubmitting(true);
+    try {
+      const { data } = await axios.post(
+        `${server}/api/product/${id}/review`,
+        {
+          name: reviewName,
+          email: reviewEmail,
+          nickname: reviewNickname,
+          location: reviewLocation,
+          ratings: {
+            overall: overallRating,
+            quality: qualityRating,
+            delivery: deliveryRating,
+            service: serviceRating,
+          },
+          recommend: recommend === "Yes",
+          title: reviewTitle,
+          comment: reviewComment,
+        },
+        {
+          headers: {
+            token: Cookies.get("token"),
+          },
+        }
+      );
+      toast.success(data.message || "Review submitted successfully!");
+      setShowReviewModal(false);
+      fetchProduct(id);
+      setReviewTitle("");
+      setReviewComment("");
+      setOverallRating(0);
+      setQualityRating(0);
+      setDeliveryRating(0);
+      setServiceRating(0);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to submit review");
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
+
+  const StarRatingSelector = ({ rating, setRating }) => {
+    return (
+      <div className="flex gap-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            size={18}
+            className={`cursor-pointer transition-colors ${
+              star <= rating ? "fill-amber-400 text-amber-400" : "text-gray-300 dark:text-gray-600"
+            }`}
+            onClick={() => setRating(star)}
+          />
+        ))}
+      </div>
+    );
+  };
+
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 relative">
       {loading ? (
         <Loading />
       ) : (
@@ -275,7 +357,6 @@ const ProductPage = () => {
                 
                 <p className="text-lg font-semibold text-slate-800 dark:text-slate-200">₨ {product.price}</p>
 
-                {/* Prominent Description Box */}
                 <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2">
                   <h3 className="text-xs font-bold tracking-wider uppercase text-slate-500 dark:text-slate-400">Product Description</h3>
                   <p className="text-sm sm:text-base leading-relaxed text-slate-700 dark:text-slate-300">
@@ -297,6 +378,191 @@ const ProductPage = () => {
               </div>
             </div>
           )}
+
+          {/* Dynamic Reviews Section UI */}
+          <div className="mt-16 border-t pt-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+              <div>
+                <h2 className="text-xl font-bold">Reviews</h2>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="flex text-amber-400">
+                    {[...Array(5)].map((_, i) => (
+                      <Star 
+                        key={i} 
+                        size={16} 
+                        className={i < Math.round(reviewStats?.averageRating || 0) ? "fill-amber-400" : "text-gray-300 dark:text-gray-600"} 
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm font-semibold">
+                    {reviewStats?.averageRating || 0} (Based on {reviewStats?.totalReviews || 0} Ratings)
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 mt-1">
+                  {reviewStats?.recommendPercentage || 0}% of reviewers would recommend this product
+                </p>
+              </div>
+
+              <button
+                onClick={() => {
+                  if (!isAuth) {
+                    toast.error("Please login to write a review");
+                    return;
+                  }
+                  setShowReviewModal(true);
+                }}
+                className="px-6 py-2.5 rounded-full bg-[#4A5D4E] hover:bg-[#3B4C3F] text-white font-medium text-sm transition-colors shadow-sm"
+              >
+                Write a review
+              </button>
+            </div>
+
+            {/* Render List of Dynamic Reviews */}
+            <div className="space-y-4 mt-6">
+              {reviews && reviews.length > 0 ? (
+                reviews.map((rev) => (
+                  <div key={rev._id} className="p-4 border rounded-xl dark:border-slate-800 space-y-2">
+                    <div className="flex justify-between items-center">
+                      <h4 className="font-semibold text-sm">{rev.nickname || rev.name}</h4>
+                      <span className="text-xs text-slate-400">{new Date(rev.createdAt).toLocaleDateString()}</span>
+                    </div>
+                    {rev.title && <h5 className="font-medium text-sm text-slate-800 dark:text-slate-200">{rev.title}</h5>}
+                    {rev.comment && <p className="text-sm text-slate-600 dark:text-slate-400">{rev.comment}</p>}
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-slate-500">No reviews yet. Be the first to write one!</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Review Modal Pop-up */}
+      {showReviewModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden relative p-6 sm:p-8 my-8">
+            <button
+              onClick={() => setShowReviewModal(false)}
+              className="absolute top-5 right-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+            >
+              <X size={20} />
+            </button>
+
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Product Reviews</h3>
+
+            <form onSubmit={handleReviewSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <Input
+                      placeholder="Enter your name"
+                      value={reviewName}
+                      onChange={(e) => setReviewName(e.target.value)}
+                      required
+                    />
+                    <Input
+                      placeholder="Enter your email"
+                      type="email"
+                      value={reviewEmail}
+                      onChange={(e) => setReviewEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <Input
+                        placeholder="Enter your nickname"
+                        value={reviewNickname}
+                        onChange={(e) => setReviewNickname(e.target.value)}
+                      />
+                      <p className="text-[10px] text-gray-400 mt-1">This name will be published with this review.</p>
+                    </div>
+                    <div>
+                      <Input
+                        placeholder="Enter your location"
+                        value={reviewLocation}
+                        onChange={(e) => setReviewLocation(e.target.value)}
+                      />
+                      <p className="text-[10px] text-gray-400 mt-1">Example: Karachi, Lahore, Islamabad.</p>
+                    </div>
+                  </div>
+
+                  <div className="border-t pt-4 mt-2">
+                    <h4 className="text-xs font-bold tracking-wider uppercase text-slate-500 mb-3">My Rating</h4>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-slate-700 dark:text-slate-300">Overall Rating</span>
+                        <StarRatingSelector rating={overallRating} setRating={setOverallRating} />
+                      </div>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-slate-700 dark:text-slate-300">Quality</span>
+                        <StarRatingSelector rating={qualityRating} setRating={setQualityRating} />
+                      </div>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-slate-700 dark:text-slate-300">Delivery</span>
+                        <StarRatingSelector rating={deliveryRating} setRating={setDeliveryRating} />
+                      </div>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-slate-700 dark:text-slate-300">Service</span>
+                        <StarRatingSelector rating={serviceRating} setRating={setServiceRating} />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-2">
+                    <p className="text-xs text-slate-600 dark:text-slate-400 mb-2">I would recommend this to a friend.</p>
+                    <div className="flex gap-6 text-sm">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="recommend"
+                          checked={recommend === "Yes"}
+                          onChange={() => setRecommend("Yes")}
+                        />
+                        Yes
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="recommend"
+                          checked={recommend === "No"}
+                          onChange={() => setRecommend("No")}
+                        />
+                        No
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4 flex flex-col justify-between">
+                  <div className="space-y-4">
+                    <h4 className="text-xs font-bold tracking-wider uppercase text-slate-500">My Review (Optional)</h4>
+                    <Input
+                      placeholder="Review Title"
+                      value={reviewTitle}
+                      onChange={(e) => setReviewTitle(e.target.value)}
+                    />
+                    <textarea
+                      placeholder="Write your review"
+                      rows={5}
+                      value={reviewComment}
+                      onChange={(e) => setReviewComment(e.target.value)}
+                      className="w-full p-3 text-sm border rounded-md dark:bg-slate-950 dark:border-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#4A5D4E]"
+                    ></textarea>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={reviewSubmitting}
+                    className="w-full py-3 rounded-full bg-[#4A5D4E] hover:bg-[#3B4C3F] text-white font-medium text-sm transition-colors shadow-sm mt-4 flex items-center justify-center"
+                  >
+                    {reviewSubmitting ? <Loader className="animate-spin h-5 w-5" /> : "Submit"}
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 

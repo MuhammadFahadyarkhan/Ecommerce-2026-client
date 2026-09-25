@@ -28,6 +28,14 @@ const ProductPage = () => {
     fetchProduct(id);
   }, [id]);
 
+  // Sync user details to review form once user data loads
+  useEffect(() => {
+    if (user) {
+      setReviewName(user.name || "");
+      setReviewEmail(user.email || "");
+    }
+  }, [user]);
+
   const addToCartHandler = () => {
     addToCart(product);
   };
@@ -37,6 +45,7 @@ const ProductPage = () => {
   const [description, setDescription] = useState("");
   const [stock, setStock] = useState("");
   const [price, setPrice] = useState("");
+  const [discount, setDiscount] = useState("");
   const [category, setCategory] = useState("");
   const [btnLoading, setBtnLoading] = useState(false);
   const [updatedImages, setUpdatedImages] = useState(null);
@@ -64,6 +73,7 @@ const ProductPage = () => {
       setDescription(product.description || "");
       setStock(product.stock || "");
       setPrice(product.price || "");
+      setDiscount(product.discount || "");
     }
   };
 
@@ -74,7 +84,7 @@ const ProductPage = () => {
     try {
       const { data } = await axios.put(
         `${server}/api/product/${id}`,
-        { title, description, price, stock, category },
+        { title, description, price, discount, stock, category },
         {
           headers: {
             token: Cookies.get("token"),
@@ -238,6 +248,13 @@ const ProductPage = () => {
     );
   };
 
+  // Calculate discount metrics
+  const discountPercent = product?.discount || 0;
+  const hasDiscount = discountPercent > 0;
+  const discountedPrice = hasDiscount 
+    ? product.price * (1 - discountPercent / 100) 
+    : product?.price;
+
   return (
     <div className="container mx-auto px-4 py-8 relative">
       {loading ? (
@@ -305,6 +322,17 @@ const ProductPage = () => {
                     />
                   </div>
                   <div>
+                    <Label>Discount Percentage (%)</Label>
+                    <Input
+                      placeholder="e.g. 20 for 20% off"
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={discount}
+                      onChange={(e) => setDiscount(e.target.value)}
+                    />
+                  </div>
+                  <div>
                     <Label>Stock</Label>
                     <Input
                       placeholder="Product Stock"
@@ -330,12 +358,11 @@ const ProductPage = () => {
               <div className="w-full lg:max-w-[650px]">
                 <Carousel>
                   <CarouselContent>
-                    {product.images &&
-                      product.images.map((image, index) => (
-                        <CarouselItem key={index}>
-                          <img src={image.url} alt="image" className="w-full rounded-md object-cover" />
-                        </CarouselItem>
-                      ))}
+                    {product?.images?.map((image, index) => (
+                      <CarouselItem key={index}>
+                        <img src={image.url} alt="image" className="w-full rounded-md object-cover" />
+                      </CarouselItem>
+                    ))}
                   </CarouselContent>
                   <CarouselPrevious />
                   <CarouselNext />
@@ -369,9 +396,16 @@ const ProductPage = () => {
                   </span>
                 )}
 
-                <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">{product.title}</h1>
+                <div className="flex items-center gap-3">
+                  <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">{product.title}</h1>
+                  {hasDiscount && (
+                    <span className="bg-red-100 text-red-600 dark:bg-red-950 dark:text-red-400 text-xs font-semibold px-2.5 py-1 rounded-full">
+                      {discountPercent}% OFF
+                    </span>
+                  )}
+                </div>
                 
-                {/* Added Review Stars Under the Title */}
+                {/* Review Stars Under the Title */}
                 <div className="flex items-center gap-2">
                   <div className="flex text-amber-400">
                     {[...Array(5)].map((_, i) => (
@@ -387,7 +421,17 @@ const ProductPage = () => {
                   </span>
                 </div>
 
-                <p className="text-lg font-semibold text-slate-800 dark:text-slate-200">₨ {product.price}</p>
+                {/* Price Display with Strikethrough for Old Price */}
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl font-bold text-slate-900 dark:text-white">
+                    ₨ {discountedPrice.toFixed(2)}
+                  </span>
+                  {hasDiscount && (
+                    <span className="text-lg text-slate-500 line-through">
+                      ₨ {product.price.toFixed(2)}
+                    </span>
+                  )}
+                </div>
 
                 <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2">
                   <h3 className="text-xs font-bold tracking-wider uppercase text-slate-500 dark:text-slate-400">Product Description</h3>

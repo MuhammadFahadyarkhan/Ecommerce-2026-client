@@ -1,12 +1,16 @@
 import React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Button } from './ui/button'
-import { ShoppingCart } from 'lucide-react'
+import { ShoppingCart, Star } from 'lucide-react'
 import { CartData } from '@/context/CartContext'
+import { Button } from '@/components/ui/button'
 
 const ProductCard = ({ product }) => {
     const navigate = useNavigate()
     const { addToCart } = CartData()
+
+    // Safely read the rating metrics stored on the product document
+    const averageRating = product.ratings?.average || 0;
+    const totalReviews = product.ratings?.total || 0;
 
     return (
         <div>
@@ -34,7 +38,23 @@ const ProductCard = ({ product }) => {
                                 {product.description.slice(0, 30)}
                             </p>
 
-                            {/* Price and Button Side-by-Side Layout with Reduced Price Font */}
+                            {/* Star Ratings */}
+                            <div className="flex items-center gap-1.5 mt-2">
+                                <div className="flex text-amber-400">
+                                    {[...Array(5)].map((_, i) => (
+                                        <Star 
+                                            key={i} 
+                                            size={14} 
+                                            className={i < Math.round(averageRating) ? "fill-amber-400" : "text-gray-300 dark:text-gray-600"} 
+                                        />
+                                    ))}
+                                </div>
+                                <span className="text-xs font-medium text-slate-600 dark:text-slate-300">
+                                    ({totalReviews})
+                                </span>
+                            </div>
+
+                            {/* Price and Button Side-by-Side Layout */}
                             <div className="flex items-center justify-between mt-4">
                                 <div className="text-sm font-bold text-slate-900 dark:text-white">
                                     ₨ {product.price}
@@ -42,13 +62,13 @@ const ProductCard = ({ product }) => {
                                 
                                 <div className="flex items-center gap-2">
                                     {/* Circular Add to Cart Button */}
-                                    <button 
+                                    <Button 
                                         onClick={() => addToCart(product)}
-                                        className="w-9 h-9 rounded-full bg-green-600 hover:bg-green-700 text-white flex items-center justify-center transition-colors shadow-sm"
+                                        className="w-9 h-9 rounded-full bg-green-600 hover:bg-green-700 text-white flex items-center justify-center transition-colors shadow-sm p-0"
                                         aria-label="Add to Cart"
                                     >
                                         <ShoppingCart size={16} />
-                                    </button>
+                                    </Button>
 
                                     {/* View Product Button */}
                                     <Button onClick={() => navigate(`/product/${product._id}`)}>

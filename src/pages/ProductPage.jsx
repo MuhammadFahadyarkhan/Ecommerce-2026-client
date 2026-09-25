@@ -371,6 +371,22 @@ const ProductPage = () => {
 
                 <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">{product.title}</h1>
                 
+                {/* Added Review Stars Under the Title */}
+                <div className="flex items-center gap-2">
+                  <div className="flex text-amber-400">
+                    {[...Array(5)].map((_, i) => (
+                      <Star 
+                        key={i} 
+                        size={16} 
+                        className={i < Math.round(reviewStats?.averageRating || 0) ? "fill-amber-400" : "text-gray-300 dark:text-gray-600"} 
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    {reviewStats?.averageRating || 0} ({reviewStats?.totalReviews || 0} {reviewStats?.totalReviews === 1 ? 'Rating' : 'Ratings'})
+                  </span>
+                </div>
+
                 <p className="text-lg font-semibold text-slate-800 dark:text-slate-200">₨ {product.price}</p>
 
                 <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2">

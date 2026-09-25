@@ -15,6 +15,11 @@ export const ProductProvider = ({ children }) => {
   const [price, setPrice] = useState("");
   const [categories, setCategories] = useState([]);
 
+  const [product, setProduct] = useState(null);
+  const [relatedProduct, setRelatedProduct] = useState([]);
+  const [reviews, setReviews] = useState([]);
+  const [reviewStats, setReviewStats] = useState(null);
+
   // Auto-reset page to 1 whenever filters change
   useEffect(() => {
     setPage(1);
@@ -27,7 +32,7 @@ export const ProductProvider = ({ children }) => {
         `${server}/api/product/all?search=${search}&category=${encodeURIComponent(category)}&sortByPrice=${price}&page=${page}`
       );
       setProducts(data.products);
-      setNewProd(data.newProduct);
+      setNewProd(data.newProduct || data.newProducts || []);
       if (data.categories) setCategories(data.categories);
       setTotalPages(data.totalPages);
     } catch (error) {
@@ -48,19 +53,14 @@ export const ProductProvider = ({ children }) => {
     }
   }
 
-  const [product, setProduct] = useState(null);
-  const [relatedProduct, setRelatedProduct] = useState([]);
-  const [reviews, setReviews] = useState([]);           // <--- Added reviews state
-  const [reviewStats, setReviewStats] = useState(null); // <--- Added reviewStats state
-
   async function fetchProduct(id) {
     setLoading(true);
     try {
       const { data } = await axios.get(`${server}/api/product/${id}`);
       setProduct(data.product);
-      setRelatedProduct(data.relatedProduct);
-      setReviews(data.reviews);             // <--- Save reviews into state
-      setReviewStats(data.reviewStats);     // <--- Save reviewStats into state
+      setRelatedProduct(data.relatedProduct || []);
+      setReviews(data.reviews || []);
+      setReviewStats(data.reviewStats || null);
     } catch (error) {
       console.log(error);
     } finally {
@@ -97,8 +97,8 @@ export const ProductProvider = ({ children }) => {
         fetchProduct,
         product,
         relatedProduct,
-        reviews,        // <--- Provided to components
-        reviewStats,    // <--- Provided to components
+        reviews,
+        reviewStats,
       }}
     >
       {children}

@@ -48,8 +48,10 @@ export const ProductProvider = ({ children }) => {
     }
   }
 
-  const [product, setProduct] = useState([]);
+  const [product, setProduct] = useState(null);
   const [relatedProduct, setRelatedProduct] = useState([]);
+  const [reviews, setReviews] = useState([]);           // <--- Added reviews state
+  const [reviewStats, setReviewStats] = useState(null); // <--- Added reviewStats state
 
   async function fetchProduct(id) {
     setLoading(true);
@@ -57,6 +59,8 @@ export const ProductProvider = ({ children }) => {
       const { data } = await axios.get(`${server}/api/product/${id}`);
       setProduct(data.product);
       setRelatedProduct(data.relatedProduct);
+      setReviews(data.reviews);             // <--- Save reviews into state
+      setReviewStats(data.reviewStats);     // <--- Save reviewStats into state
     } catch (error) {
       console.log(error);
     } finally {
@@ -93,6 +97,8 @@ export const ProductProvider = ({ children }) => {
         fetchProduct,
         product,
         relatedProduct,
+        reviews,        // <--- Provided to components
+        reviewStats,    // <--- Provided to components
       }}
     >
       {children}
@@ -100,5 +106,4 @@ export const ProductProvider = ({ children }) => {
   );
 };
 
-// <-- THIS EXPORT WAS MISSING, CAUSING THE MODULE SYNTAX ERROR
 export const ProductData = () => useContext(ProductContext);

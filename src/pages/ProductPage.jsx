@@ -153,6 +153,22 @@ const ProductPage = () => {
     }
   };
 
+  const handleReviewDelete = async (reviewId) => {
+    if (window.confirm("Are you sure you want to delete this review?")) {
+      try {
+        const { data } = await axios.delete(`${server}/api/product/${id}/review/${reviewId}`, {
+          headers: {
+            token: Cookies.get("token"),
+          },
+        });
+        toast.success(data.message || "Review deleted successfully");
+        fetchProduct(id);
+      } catch (error) {
+        toast.error(error.response?.data?.message || "Failed to delete review");
+      }
+    }
+  };
+
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
     if (!isAuth) {
@@ -383,7 +399,7 @@ const ProductPage = () => {
           <div className="mt-16 border-t pt-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
               <div>
-                <h2 className="text-xl font-bold">Reviews</h2>
+                <h2 className="text-xl font-bold">Customer Reviews</h2>
                 <div className="flex items-center gap-2 mt-1">
                   <div className="flex text-amber-400">
                     {[...Array(5)].map((_, i) => (
@@ -417,17 +433,85 @@ const ProductPage = () => {
               </button>
             </div>
 
-            {/* Render List of Dynamic Reviews */}
-            <div className="space-y-4 mt-6">
+            <hr className="border-gray-300 mb-6" />
+
+            {/* Render List of Dynamic Reviews formatted as requested */}
+            <div className="space-y-6">
               {reviews && reviews.length > 0 ? (
                 reviews.map((rev) => (
-                  <div key={rev._id} className="p-4 border rounded-xl dark:border-slate-800 space-y-2">
-                    <div className="flex justify-between items-center">
-                      <h4 className="font-semibold text-sm">{rev.nickname || rev.name}</h4>
-                      <span className="text-xs text-slate-400">{new Date(rev.createdAt).toLocaleDateString()}</span>
+                  <div key={rev._id} className="pb-6 border-b border-gray-100 dark:border-slate-800 last:border-none">
+                    <div className="flex flex-col">
+                      {/* Header Row with Name/Location & Admin Delete Button */}
+                      <div className="flex justify-between items-start">
+                        <div className="flex flex-wrap items-center gap-1 text-sm">
+                          <span className="font-semibold text-slate-900 dark:text-white">
+                            {rev.nickname || rev.name || "Anonymous"}
+                          </span>
+                          {rev.location && (
+                            <span className="text-slate-500">from {rev.location}</span>
+                          )}
+                        </div>
+
+                        {user && user.role === "admin" && (
+                          <button
+                            onClick={() => handleReviewDelete(rev._id)}
+                            className="text-red-500 hover:text-red-700 transition-colors p-1"
+                            title="Delete Review"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Date & Rating Stars */}
+                      <div className="flex items-center gap-2 mt-1 text-xs text-slate-500">
+                        <span>
+                          {new Date(rev.createdAt).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </span>
+                        <span>•</span>
+                        <div className="flex items-center text-amber-500 gap-0.5">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              size={12}
+                              className={
+                                i < (rev.ratings?.overall || 5)
+                                  ? "fill-amber-400 text-amber-400"
+                                  : "text-gray-300 dark:text-gray-600"
+                              }
+                            />
+                          ))}
+                        </div>
+                        <span className="text-slate-700 dark:text-slate-300 font-medium">
+                          ({Number(rev.ratings?.overall || 5).toFixed(1)})
+                        </span>
+                      </div>
+
+                      {/* Review Title */}
+                      {rev.title && (
+                        <h4 className="font-medium text-slate-900 dark:text-white mt-2 text-sm">
+                          {rev.title}
+                        </h4>
+                      )}
+
+                      {/* Comment Body */}
+                      {rev.comment && (
+                        <p className="text-slate-700 dark:text-slate-300 text-sm mt-1 leading-relaxed">
+                          {rev.comment}
+                        </p>
+                      )}
+
+                      {/* Recommendation Status */}
+                      {rev.recommend && (
+                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-2 font-medium">
+                          I would recommend this to a friend!
+                        </p>
+                      )}
                     </div>
-                    {rev.title && <h5 className="font-medium text-sm text-slate-800 dark:text-slate-200">{rev.title}</h5>}
-                    {rev.comment && <p className="text-sm text-slate-600 dark:text-slate-400">{rev.comment}</p>}
                   </div>
                 ))
               ) : (

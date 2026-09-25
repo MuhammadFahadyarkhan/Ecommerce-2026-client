@@ -24,7 +24,15 @@ const Products = () => {
     setPage,
     products,
     loading,
+    fetchProducts, // Ensure this is exported from your ProductContext to trigger a background sync if needed
   } = ProductData();
+
+  // Re-fetch products when mounting or when returning to this page so ratings are always fresh
+  useEffect(() => {
+    if (fetchProducts) {
+      fetchProducts();
+    }
+  }, []);
 
   // Sync URL Query Parameter to Context Category on mount or URL change
   useEffect(() => {

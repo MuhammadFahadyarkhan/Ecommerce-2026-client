@@ -1,5 +1,5 @@
 import axios from "axios";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useRef } from "react";
 import { server } from "../main";
 
 const ProductContext = createContext();
@@ -20,25 +20,40 @@ export const ProductProvider = ({ children }) => {
   const [reviews, setReviews] = useState([]);
   const [reviewStats, setReviewStats] = useState(null);
 
+  // Use a ref to track the latest request to prevent race conditions
+  const activeRequestRef = useRef(null);
+
   // Auto-reset page to 1 whenever filters change
   useEffect(() => {
     setPage(1);
   }, [search, category, price]);
 
-  async function fetchProducts() {
+  async function fetchProducts(targetPage = page) {
     setLoading(true);
+    const requestId = {};
+    activeRequestRef.current = requestId;
+
     try {
       const { data } = await axios.get(
-        `${server}/api/product/all?search=${search}&category=${encodeURIComponent(category)}&sortByPrice=${price}&page=${page}`
+        `${server}/api/product/all?search=${search}&category=${encodeURIComponent(category)}&sortByPrice=${price}&page=${targetPage}`
       );
-      setProducts(data.products);
+      
+      // Prevent older overlapping requests from overriding newer state
+      if (activeRequestRef.current !== requestId) return;
+
+      setProducts(data.products || []);
       setNewProd(data.newProduct || data.newProducts || []);
-      if (data.categories) setCategories(data.categories);
-      setTotalPages(data.totalPages);
+      // DO NOT overwrite global category list from product search response 
+      // to avoid dropdown state corruption. Let fetchCategories handle it.
+      setTotalPages(data.totalPages || 1);
     } catch (error) {
-      console.log(error);
+      if (activeRequestRef.current === requestId) {
+        console.log(error);
+      }
     } finally {
-      setLoading(false);
+      if (activeRequestRef.current === requestId) {
+        setLoading(false);
+      }
     }
   }
 
@@ -68,8 +83,9 @@ export const ProductProvider = ({ children }) => {
     }
   }
 
+  // Unified effect with request guard
   useEffect(() => {
-    fetchProducts();
+    fetchProducts(page);
   }, [search, category, page, price]);
 
   useEffect(() => {

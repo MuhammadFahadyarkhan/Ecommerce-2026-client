@@ -36,6 +36,12 @@ const Payment = () => {
     fetchAddress();
   }, [id]);
 
+  // Helper function to eliminate floating-point precision glitches
+  const formatCurrency = (amount) => {
+    const num = Number(amount || 0);
+    return (Math.round(num * 100) / 100).toFixed(2);
+  };
+
   // 🛡️ Dynamically calculate the correct subtotal with discounts applied
   const calculatedSubTotal = cart.reduce((acc, e) => {
     if (!e.product) return acc;
@@ -104,7 +110,7 @@ const Payment = () => {
     }
   };
 
-  const advanceAmount = (calculatedSubTotal * 0.25).toFixed(2);
+  const advanceAmount = formatCurrency(calculatedSubTotal * 0.25);
 
   return (
     <div>
@@ -157,16 +163,16 @@ const Payment = () => {
                           </div>
 
                           <div className="flex items-center justify-center md:justify-start gap-2 text-sm text-muted-foreground dark:text-gray-400">
-                            <span>Rs {Number(discountedPrice).toFixed(2)} * {e.quantity}</span>
+                            <span>Rs {formatCurrency(discountedPrice)} * {e.quantity}</span>
                             {hasDiscount && (
                               <span className="line-through text-xs">
-                                Rs {Number(e.product.price).toFixed(2)}
+                                Rs {formatCurrency(e.product.price)}
                               </span>
                             )}
                           </div>
 
                           <p className="text-sm font-semibold text-muted-foreground dark:text-gray-400">
-                            Total: Rs {Number(itemTotalPrice).toFixed(2)}
+                            Total: Rs {formatCurrency(itemTotalPrice)}
                           </p>
                         </div>
                       </div>
@@ -176,7 +182,7 @@ const Payment = () => {
             </div>
 
             <div className="text-lg font-medium text-center">
-              Total Price: Rs {Number(calculatedSubTotal).toFixed(2)}
+              Total Price: Rs {formatCurrency(calculatedSubTotal)}
             </div>
 
             {address && (
@@ -225,7 +231,7 @@ const Payment = () => {
                   {method === "25% Advance" && (
                     <div className="p-4 border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900 rounded-lg space-y-3">
                       <p className="text-sm font-medium text-amber-900 dark:text-amber-200">
-                        Please transfer <strong>Rs {advanceAmount}</strong> (25% of Rs {Number(calculatedSubTotal).toFixed(2)}) to the bank details below and upload your payment screenshot proof for admin approval.
+                        Please transfer <strong>Rs {advanceAmount}</strong> (25% of Rs {formatCurrency(calculatedSubTotal)}) to the bank details below and upload your payment screenshot proof for admin approval.
                       </p>
 
                       <div className="bg-white dark:bg-gray-900 p-3 rounded border dark:border-gray-800 text-xs space-y-1 font-mono">

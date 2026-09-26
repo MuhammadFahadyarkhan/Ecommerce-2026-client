@@ -12,6 +12,12 @@ const Cart = () => {
     await updateCart(action, id);
   };
 
+  // Helper function to eliminate floating-point precision glitches
+  const formatCurrency = (amount) => {
+    const num = Number(amount || 0);
+    return (Math.round(num * 100) / 100).toFixed(2);
+  };
+
   // 🛡️ Dynamically calculate the correct subtotal with discounts applied
   const calculatedSubTotal = cart.reduce((acc, e) => {
     if (!e.product) return acc;
@@ -73,10 +79,10 @@ const Cart = () => {
                         
                         {/* Price display with discount support */}
                         <div className="flex items-center justify-center sm:justify-start gap-2">
-                          <p className="font-semibold">Rs {Number(discountedPrice).toFixed(2)}</p>
+                          <p className="font-semibold">Rs {formatCurrency(discountedPrice)}</p>
                           {hasDiscount && (
                             <p className="text-sm text-gray-500 line-through">
-                              Rs {Number(e.product.price).toFixed(2)}
+                              Rs {formatCurrency(e.product.price)}
                             </p>
                           )}
                         </div>
@@ -126,7 +132,7 @@ const Cart = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Total Items - {totalItem}</span>
-                    <span>Total Price - Rs{Number(calculatedSubTotal).toFixed(2)}</span>
+                    <span>Total Price - Rs{formatCurrency(calculatedSubTotal)}</span>
                   </div>
                 </div>
 
@@ -135,7 +141,7 @@ const Cart = () => {
 
                 <div className="flex justify-between font-medium text-lg">
                   <span>Total:</span>
-                  <span>Rs{Number(calculatedSubTotal).toFixed(2)}</span>
+                  <span>Rs{formatCurrency(calculatedSubTotal)}</span>
                 </div>
                 <Button className="w-full mt-6" onClick={()=>navigate("/checkout")}
                 disabled={cart.length === 0}>Checkout</Button>

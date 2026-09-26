@@ -114,7 +114,10 @@ const Orders = () => {
 
           const isRejected = order.status?.toLowerCase().includes("rejected");
           const isCodWithoutProof = order.method?.toLowerCase() === "cod" && !order.paymentProof && !isRejected;
-          const advanceAmount = (order.subTotal * 0.25).toFixed(2);
+
+          // Uses the accurate discounted subtotal stored directly by the backend database
+          const finalSubTotal = order.subTotal;
+          const advanceAmount = (finalSubTotal * 0.25).toFixed(2);
 
           return (
             <Card
@@ -141,7 +144,7 @@ const Orders = () => {
                     <strong>Total Items: </strong> {order.items.length}
                   </p>
                   <p>
-                    <strong>SubTotal: </strong> Rs {order.subTotal}
+                    <strong>SubTotal: </strong> Rs {Number(finalSubTotal).toFixed(2)}
                   </p>
                   <p>
                     <strong>Placed At: </strong> {formattedDate}

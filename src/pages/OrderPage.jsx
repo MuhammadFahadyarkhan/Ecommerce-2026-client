@@ -109,7 +109,7 @@ const OrderPage = () => {
               </p>
               <p>
                 <strong>SubTotal: </strong>
-                Rs {order.subTotal}
+                Rs {Number(order.subTotal).toFixed(2)}
               </p>
               
               {/* Show Advance Breakdown if payment proof exists */}
@@ -178,6 +178,14 @@ const OrderPage = () => {
             );
           }
 
+          // Calculate discount details
+          const discountPercent = e.product.discountPercent || e.product.discount || 0;
+          const hasDiscount = discountPercent > 0;
+          const discountedPrice = hasDiscount 
+            ? e.product.price * (1 - discountPercent / 100) 
+            : e.product.price;
+          const itemTotalPrice = discountedPrice * e.quantity;
+
           return (
             <Card 
               key={i} 
@@ -187,7 +195,12 @@ const OrderPage = () => {
                 to={`/product/${e.product._id}`}
                 className="outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:ring-0"
               >
-                <div className="w-full h-48 bg-gray-50 flex items-center justify-center overflow-hidden">
+                <div className="w-full h-48 bg-gray-50 flex items-center justify-center overflow-hidden relative">
+                  {hasDiscount && (
+                    <span className="absolute top-2 left-2 bg-red-100 text-red-600 dark:bg-red-950 dark:text-red-400 text-xs font-semibold px-2 py-0.5 rounded-full z-10">
+                      {discountPercent}% OFF
+                    </span>
+                  )}
                   <img
                     src={e.product.images?.[0]?.url || "/placeholder.png"}
                     alt={e.product.title}
@@ -195,15 +208,26 @@ const OrderPage = () => {
                   />
                 </div>
               </Link>
-              <CardContent className="p-10 space-y-2">
+              <CardContent className="p-6 space-y-2">
                 <h3 className="text-base font-semibold line-clamp-2">{e.product.title}</h3>
                 <p className="text-sm">
                   <strong>Quantity: </strong>
                   {e.quantity}
                 </p>
-                <p className="text-sm">
-                  <strong>Price: </strong>Rs {e.product.price}
-                </p>
+                <div className="flex flex-col text-sm space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <strong>Price:</strong> 
+                    <span>Rs {Number(discountedPrice).toFixed(2)}</span>
+                    {hasDiscount && (
+                      <span className="line-through text-xs text-muted-foreground">
+                        Rs {Number(e.product.price).toFixed(2)}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground font-semibold">
+                    Total: Rs {Number(itemTotalPrice).toFixed(2)}
+                  </p>
+                </div>
               </CardContent>
             </Card>
           );

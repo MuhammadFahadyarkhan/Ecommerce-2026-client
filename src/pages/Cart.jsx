@@ -5,12 +5,22 @@ import { ShoppingCart, Trash } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
 const Cart = () => {
-  const { cart, totalItem, subTotal, updateCart, removeFromCart } = CartData();
+  const { cart, totalItem, updateCart, removeFromCart } = CartData();
   const navigate = useNavigate();
 
   const updateCartHandler = async (action, id) => {
     await updateCart(action, id);
   };
+
+  // 🛡️ Dynamically calculate the correct subtotal with discounts applied
+  const calculatedSubTotal = cart.reduce((acc, e) => {
+    if (!e.product) return acc;
+    const discountPercent = e.product.discountPercent || e.product.discount || 0;
+    const discountedPrice = discountPercent > 0 
+      ? e.product.price * (1 - discountPercent / 100) 
+      : e.product.price;
+    return acc + (discountedPrice * e.quantity);
+  }, 0);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -30,50 +40,76 @@ const Cart = () => {
             {/* Left Side: Cart Items List (Spans 2 columns) */}
             <div className="lg:col-span-2 space-y-6">
               {
-                cart.map((e) => (
-                  <div 
-                    key={e._id} 
-                    className="flex flex-col sm:flex-row items-center sm:items-stretch space-y-4 sm:space-y-0 sm:space-x-4 shadow-md rounded-lg p-4 border border-gray-400"
-                  >
-                    <img
-                      src={e.product.images[0].url}
-                      alt={e.product.title}
-                      className="w-full sm:w-20 sm:h-20 object-cover rounded-md cursor-pointer"
-                      onClick={() => navigate(`/product/${e.product._id}`)}
-                    />
-                    <div className="flex-1 text-center sm:text-left">
-                      <h2 className="text-lg font-medium">{e.product.title}</h2>
-                      {/* Fixed price decimal */}
-                      <p>Price: Rs {Number(e.product.price).toFixed(2)}</p>
-                    </div>
+                cart.map((e) => {
+                  if (!e.product) return null;
 
-                    <div className="flex items-center justify-center sm:justify-start gap-2">
+                  // Calculate discount metrics for each item dynamically
+                  const discountPercent = e.product.discountPercent || e.product.discount || 0;
+                  const hasDiscount = discountPercent > 0;
+                  const discountedPrice = hasDiscount 
+                    ? e.product.price * (1 - discountPercent / 100) 
+                    : e.product.price;
+
+                  return (
+                    <div 
+                      key={e._id} 
+                      className="flex flex-col sm:flex-row items-center sm:items-stretch space-y-4 sm:space-y-0 sm:space-x-4 shadow-md rounded-lg p-4 border border-gray-400"
+                    >
+                      <img
+                        src={e.product.images[0].url}
+                        alt={e.product.title}
+                        className="w-full sm:w-20 sm:h-20 object-cover rounded-md cursor-pointer"
+                        onClick={() => navigate(`/product/${e.product._id}`)}
+                      />
+                      <div className="flex-1 text-center sm:text-left space-y-1">
+                        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                          <h2 className="text-lg font-medium">{e.product.title}</h2>
+                          {hasDiscount && (
+                            <span className="bg-red-100 text-red-600 dark:bg-red-950 dark:text-red-400 text-xs font-semibold px-2 py-0.5 rounded-full">
+                              {discountPercent}% OFF
+                            </span>
+                          )}
+                        </div>
+                        
+                        {/* Price display with discount support */}
+                        <div className="flex items-center justify-center sm:justify-start gap-2">
+                          <p className="font-semibold">Rs {Number(discountedPrice).toFixed(2)}</p>
+                          {hasDiscount && (
+                            <p className="text-sm text-gray-500 line-through">
+                              Rs {Number(e.product.price).toFixed(2)}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-center sm:justify-start gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => updateCartHandler("dec", e._id)}
+                        >
+                          -
+                        </Button>
+                        <span className="text-center">{e.quantity}</span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => updateCartHandler("inc", e._id)}
+                        >
+                          +
+                        </Button>
+                      </div>
+                      
                       <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => updateCartHandler("dec", e._id)}
+                        variant="ghost"
+                        className="text-red-600"
+                        onClick={() => removeFromCart(e._id)}
                       >
-                        -
-                      </Button>
-                      <span className="text-center">{e.quantity}</span>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => updateCartHandler("inc", e._id)}
-                      >
-                        +
+                        <Trash className="w-5 h-5" />
                       </Button>
                     </div>
-                    
-                    <Button
-                      variant="ghost"
-                      className="text-red-600"
-                      onClick={() => removeFromCart(e._id)}
-                    >
-                      <Trash className="w-5 h-5" />
-                    </Button>
-                  </div>
-                ))
+                  );
+                })
               }
             </div>
 
@@ -90,8 +126,7 @@ const Cart = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Total Items - {totalItem}</span>
-                    {/* Fixed subTotal decimal */}
-                    <span>Total Price - Rs{Number(subTotal).toFixed(2)}</span>
+                    <span>Total Price - Rs{Number(calculatedSubTotal).toFixed(2)}</span>
                   </div>
                 </div>
 
@@ -100,8 +135,7 @@ const Cart = () => {
 
                 <div className="flex justify-between font-medium text-lg">
                   <span>Total:</span>
-                  {/* Fixed subTotal decimal */}
-                  <span>Rs{Number(subTotal).toFixed(2)}</span>
+                  <span>Rs{Number(calculatedSubTotal).toFixed(2)}</span>
                 </div>
                 <Button className="w-full mt-6" onClick={()=>navigate("/checkout")}
                 disabled={cart.length === 0}>Checkout</Button>

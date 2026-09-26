@@ -11,7 +11,7 @@ import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 
 const Payment = () => {
-  const { cart, subTotal, fetchCart } = CartData();
+  const { cart, fetchCart } = CartData();
   const [address, setAddress] = useState(null);
   const [method, setMethod] = useState("cod"); // "cod" or "25% Advance"
   const [proofFile, setProofFile] = useState(null);
@@ -35,6 +35,16 @@ const Payment = () => {
   useEffect(() => {
     fetchAddress();
   }, [id]);
+
+  // 🛡️ Dynamically calculate the correct subtotal with discounts applied
+  const calculatedSubTotal = cart.reduce((acc, e) => {
+    if (!e.product) return acc;
+    const discountPercent = e.product.discountPercent || e.product.discount || 0;
+    const discountedPrice = discountPercent > 0 
+      ? e.product.price * (1 - discountPercent / 100) 
+      : e.product.price;
+    return acc + (discountedPrice * e.quantity);
+  }, 0);
 
   const paymentHandler = async () => {
     if (!address) return;
@@ -71,7 +81,7 @@ const Payment = () => {
         formData.append("method", "25% Advance");
         formData.append("phone", address.phone);
         formData.append("address", address.address);
-        formData.append("files", proofFile); // 👈 Matches multer .array("files", 10)
+        formData.append("files", proofFile); // Matches multer .array("files", 10)
 
         const { data } = await axios.post(
           `${server}/api/order/new/proof`, 
@@ -79,8 +89,6 @@ const Payment = () => {
           {
             headers: {
               token: Cookies.get("token"),
-              // NOTE: Do NOT manually set "Content-Type": "multipart/form-data" here. 
-              // Leaving it out allows Axios to automatically inject the correct multipart boundary string.
             },
           }
         );
@@ -96,7 +104,7 @@ const Payment = () => {
     }
   };
 
-  const advanceAmount = (subTotal * 0.25).toFixed(2);
+  const advanceAmount = (calculatedSubTotal * 0.25).toFixed(2);
 
   return (
     <div>
@@ -114,36 +122,61 @@ const Payment = () => {
 
               <div className="space-y-4">
                 {cart &&
-                  cart.map((e, i) => (
-                    <div
-                      key={i}
-                      className="flex flex-col md:flex-row items-center justify-between bg-card p-4 rounded-lg shadow border dark:border-gray-700"
-                    >
-                      <img
-                        src={e.product.images[0].url}
-                        alt="xyz"
-                        className="w-16 h-16 object-cover rounded mb-4 md:mb-0"
-                      />
+                  cart.map((e, i) => {
+                    if (!e.product) return null;
 
-                      <div className="flex-1 md:ml-4 text-center md:text-left">
-                        <h2 className="text-lg font-medium">
-                          {e.product.title}
-                        </h2>
-                        <p className="text-sm text-muted-foreground dark:text-gray-400">
-                          Rs {e.product.price} * {e.quantity}
-                        </p>
+                    // Calculate discount metrics for each item dynamically
+                    const discountPercent = e.product.discountPercent || e.product.discount || 0;
+                    const hasDiscount = discountPercent > 0;
+                    const discountedPrice = hasDiscount 
+                      ? e.product.price * (1 - discountPercent / 100) 
+                      : e.product.price;
+                    const itemTotalPrice = discountedPrice * e.quantity;
 
-                        <p className="text-sm text-muted-foreground dark:text-gray-400">
-                          Rs {e.product.price * e.quantity}
-                        </p>
+                    return (
+                      <div
+                        key={i}
+                        className="flex flex-col md:flex-row items-center justify-between bg-card p-4 rounded-lg shadow border dark:border-gray-700"
+                      >
+                        <img
+                          src={e.product.images[0].url}
+                          alt="xyz"
+                          className="w-16 h-16 object-cover rounded mb-4 md:mb-0"
+                        />
+
+                        <div className="flex-1 md:ml-4 text-center md:text-left space-y-1">
+                          <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                            <h2 className="text-lg font-medium">
+                              {e.product.title}
+                            </h2>
+                            {hasDiscount && (
+                              <span className="bg-red-100 text-red-600 dark:bg-red-950 dark:text-red-400 text-xs font-semibold px-2 py-0.5 rounded-full">
+                                {discountPercent}% OFF
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="flex items-center justify-center md:justify-start gap-2 text-sm text-muted-foreground dark:text-gray-400">
+                            <span>Rs {Number(discountedPrice).toFixed(2)} * {e.quantity}</span>
+                            {hasDiscount && (
+                              <span className="line-through text-xs">
+                                Rs {Number(e.product.price).toFixed(2)}
+                              </span>
+                            )}
+                          </div>
+
+                          <p className="text-sm font-semibold text-muted-foreground dark:text-gray-400">
+                            Total: Rs {Number(itemTotalPrice).toFixed(2)}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
               </div>
             </div>
 
             <div className="text-lg font-medium text-center">
-              Total Price: Rs {subTotal}
+              Total Price: Rs {Number(calculatedSubTotal).toFixed(2)}
             </div>
 
             {address && (
@@ -192,7 +225,7 @@ const Payment = () => {
                   {method === "25% Advance" && (
                     <div className="p-4 border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900 rounded-lg space-y-3">
                       <p className="text-sm font-medium text-amber-900 dark:text-amber-200">
-                        Please transfer <strong>Rs {advanceAmount}</strong> (25% of Rs {subTotal}) to the bank details below and upload your payment screenshot proof for admin approval.
+                        Please transfer <strong>Rs {advanceAmount}</strong> (25% of Rs {Number(calculatedSubTotal).toFixed(2)}) to the bank details below and upload your payment screenshot proof for admin approval.
                       </p>
 
                       <div className="bg-white dark:bg-gray-900 p-3 rounded border dark:border-gray-800 text-xs space-y-1 font-mono">

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Trash2, Edit } from "lucide-react";
+import { Trash2, Edit, Plus } from "lucide-react";
 import toast from "react-hot-toast";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -17,7 +17,15 @@ const Catagories = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [newName, setNewName] = useState("");
   const [categoryImage, setCategoryImage] = useState(null);
-  const [openModal, setOpenModal] = useState(false);
+  
+  // Modal state controls
+  const [openEditModal, setOpenEditModal] = useState(false);
+  const [openAddModal, setOpenAddModal] = useState(false);
+  
+  // Form states for creating a new category
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [newCategoryImage, setNewCategoryImage] = useState(null);
+
   const [loading, setLoading] = useState(false);
 
   const fetchCategoryDetails = async () => {
@@ -42,8 +50,41 @@ const Catagories = () => {
     fetchCategoryDetails();
   }, []);
 
-  const handleFileChange = (e) => {
-    setCategoryImage(e.target.files[0]);
+  // Handle creating a new category
+  const handleCreateCategory = async (e) => {
+    e.preventDefault();
+    if (!newCategoryName.trim()) {
+      toast.error("Category name cannot be empty");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append("name", newCategoryName.trim());
+      if (newCategoryImage) {
+        formData.append("files", newCategoryImage);
+      }
+
+      const { data } = await axios.post(`${server}/api/category/new`, formData, {
+        headers: {
+          token: Cookies.get("token"),
+        },
+      });
+
+      toast.success(data.message || "Category created successfully!");
+      setOpenAddModal(false);
+      setNewCategoryName("");
+      setNewCategoryImage(null);
+      
+      fetchCategoryDetails();
+      if (refreshContextCategories) refreshContextCategories();
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response?.data?.message || "Failed to create category");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleUpdateCategory = async (e) => {
@@ -68,7 +109,7 @@ const Catagories = () => {
       });
 
       toast.success(data.message || "Category updated successfully!");
-      setOpenModal(false);
+      setOpenEditModal(false);
       setCategoryImage(null);
       setSelectedCategory(null);
       setNewName("");
@@ -109,6 +150,43 @@ const Catagories = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Manage Categories</h2>
+        
+        {/* Add Category Dialog Trigger */}
+        <Dialog open={openAddModal} onOpenChange={setOpenAddModal}>
+          <DialogTrigger asChild>
+            <Button className="flex items-center gap-2">
+              <Plus size={16} /> Add Category
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Category</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleCreateCategory} className="space-y-4 pt-2">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Category Name</label>
+                <Input 
+                  type="text" 
+                  placeholder="Enter category name"
+                  value={newCategoryName} 
+                  onChange={(e) => setNewCategoryName(e.target.value)} 
+                  required 
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Category Image (Optional)</label>
+                <Input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={(e) => setNewCategoryImage(e.target.files[0])} 
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Creating..." : "Create Category"}
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -138,9 +216,9 @@ const Catagories = () => {
               <CardContent className="p-4 flex flex-col gap-3">
                 <h3 className="font-semibold text-lg capitalize">{cat.name}</h3>
                 <Dialog 
-                  open={openModal && selectedCategory?.id === cat.id} 
+                  open={openEditModal && selectedCategory?.id === cat.id} 
                   onOpenChange={(isOpen) => {
-                    setOpenModal(isOpen);
+                    setOpenEditModal(isOpen);
                     if (!isOpen) {
                       setSelectedCategory(null);
                       setCategoryImage(null);
@@ -177,7 +255,7 @@ const Catagories = () => {
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Update Image (Optional)</label>
-                        <Input type="file" accept="image/*" onChange={handleFileChange} />
+                        <Input type="file" accept="image/*" onChange={(e) => setCategoryImage(e.target.files[0])} />
                       </div>
                       <Button type="submit" className="w-full" disabled={loading}>
                         {loading ? "Saving..." : "Save Changes"}

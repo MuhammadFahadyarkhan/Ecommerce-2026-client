@@ -20,16 +20,15 @@ const Catagories = () => {
   const [openModal, setOpenModal] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Fetch only actual category documents from the database
   const fetchCategoryDetails = async () => {
     try {
       const { data } = await axios.get(`${server}/api/category/all`);
       const backendCategories = data.categories || data || [];
 
-      const formattedList = backendCategories.map((bc) => ({
-        id: bc._id,
-        name: typeof bc === "string" ? bc : bc.name,
-        image: typeof bc === "object" ? bc.image?.url || null : null,
+      const formattedList = backendCategories.map((bc, index) => ({
+        id: bc._id || bc.id || `legacy_${index}`,
+        name: bc.name || bc.title || bc.category || "Unnamed Category",
+        image: bc.image?.url || null,
       }));
 
       setCategoriesWithImages(formattedList);
@@ -62,7 +61,6 @@ const Catagories = () => {
         formData.append("files", categoryImage);
       }
 
-      // If category has a real database id, call PUT update route
       const { data } = await axios.put(`${server}/api/category/${selectedCategory.id}`, formData, {
         headers: {
           token: Cookies.get("token"),
@@ -85,7 +83,6 @@ const Catagories = () => {
     }
   };
 
-  // Handler to delete category and immediately remove its card from UI
   const handleDeleteCategory = async (catId, catName) => {
     if (!window.confirm(`Are you sure you want to delete the category "${catName}"? Your products will remain safe.`)) {
       return;
@@ -118,7 +115,6 @@ const Catagories = () => {
         {categoriesWithImages && categoriesWithImages.length > 0 ? (
           categoriesWithImages.map((cat, index) => (
             <Card key={cat.id || index} className="overflow-hidden flex flex-col justify-between relative group shadow-sm hover:shadow-md transition-shadow">
-              {/* Delete Icon Button */}
               <button
                 onClick={() => handleDeleteCategory(cat.id, cat.name)}
                 className="absolute top-2 right-2 z-10 bg-red-600/80 hover:bg-red-600 text-white p-1.5 rounded-full shadow-md transition-all"
@@ -159,7 +155,7 @@ const Catagories = () => {
                       className="w-full flex items-center gap-2"
                       onClick={() => {
                         setSelectedCategory(cat);
-                        setNewName(cat.name);
+                        setNewName(cat.name || "");
                       }}
                     >
                       <Edit size={14} /> Edit Category
@@ -167,7 +163,7 @@ const Catagories = () => {
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>Edit Category: "{cat.name}"</DialogTitle>
+                      <DialogTitle>Edit Category: "{selectedCategory?.name || cat.name}"</DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleUpdateCategory} className="space-y-4 pt-2">
                       <div className="space-y-2">

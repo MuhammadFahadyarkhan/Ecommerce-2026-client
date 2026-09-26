@@ -16,16 +16,21 @@ import { useParams, useNavigate } from "react-router-dom";
 import { X, Edit, Loader, Trash2, Star } from "lucide-react";
 
 const ProductPage = () => {
-  const { fetchProduct, fetchProducts, product, relatedProduct, reviews, reviewStats, loading } = ProductData();
+  const { fetchProduct, fetchProducts, products, product, relatedProduct, reviews, reviewStats, loading } = ProductData();
   const { addToCart, fetchCart } = CartData();
   const { id } = useParams();
   const { isAuth, user } = UserData();
   const navigate = useNavigate();
 
-  const categories = ["Electronics", "Clothing", "Books", "Home", "Other"];
+  // Dynamic categories extracted from database products with a safe fallback
+  const dynamicCategories = [...new Set(products?.map((p) => p.category).filter(Boolean))];
+  const categories = dynamicCategories.length > 0 ? dynamicCategories : ["Electronics", "Clothing", "Books", "Home", "Other"];
 
   useEffect(() => {
     fetchProduct(id);
+    if (fetchProducts) {
+      fetchProducts();
+    }
   }, [id]);
 
   // Sync user details to review form once user data loads
@@ -73,7 +78,7 @@ const ProductPage = () => {
       setDescription(product.description || "");
       setStock(product.stock || "");
       setPrice(product.price || "");
-      setDiscount(product.discount || "");
+      setDiscount(product.discountPercent || product.discount || ""); // Fixed mapping to match DB schema
     }
   };
 
@@ -84,7 +89,14 @@ const ProductPage = () => {
     try {
       const { data } = await axios.put(
         `${server}/api/product/${id}`,
-        { title, description, price, discount, stock, category },
+        { 
+          title, 
+          description, 
+          price, 
+          discountPercent: discount, // Send as discountPercent to align with MongoDB schema
+          stock, 
+          category 
+        },
         {
           headers: {
             token: Cookies.get("token"),
@@ -248,8 +260,8 @@ const ProductPage = () => {
     );
   };
 
-  // Calculate discount metrics
-  const discountPercent = product?.discount || 0;
+  // Calculate discount metrics correctly using discountPercent
+  const discountPercent = product?.discountPercent || product?.discount || 0;
   const hasDiscount = discountPercent > 0;
   const discountedPrice = hasDiscount 
     ? product.price * (1 - discountPercent / 100) 

@@ -36,7 +36,7 @@ const OrderPage = () => {
 
   // Helper function to handle status text color dynamically
   const getStatusTextColor = (status) => {
-    switch (status.toLowerCase()) {
+    switch (status?.toLowerCase()) {
       case "pending":
         return "text-yellow-500";
       case "awaiting admin approval":
@@ -80,9 +80,13 @@ const OrderPage = () => {
     hour12: true,
   }).format(date);
 
+  const subTotalNum = Number(order.subTotal || 0);
+  const advanceNum = subTotalNum * 0.25;
+  const remainingNum = subTotalNum * 0.75;
+
   return (
     <div className="container mx-auto py-6 px-4">
-      {user._id === order.user._id || user.role === "admin" ? (
+      {user._id === order.user?._id || user.role === "admin" ? (
        <>
          <Card className="mb-8 border border-slate-200 shadow-sm outline-none ring-0 focus:ring-0">
         <CardHeader className="flex flex-row items-center justify-between pb-4 p-5">
@@ -109,14 +113,19 @@ const OrderPage = () => {
               </p>
               <p>
                 <strong>SubTotal: </strong>
-                Rs {Number(order.subTotal).toFixed(2)}
+                Rs {subTotalNum.toFixed(2)}
               </p>
               
               {/* Show Advance Breakdown if payment proof exists */}
-              {order.paymentProof && (
+              {order.paymentProof ? (
                 <p className="text-amber-600 font-medium">
-                  <strong>25% Advance Paid: </strong> Rs {(order.subTotal * 0.25).toFixed(2)} 
-                  <span className="block text-xs text-gray-500">Remaining Due on Delivery: Rs {(order.subTotal * 0.75).toFixed(2)}</span>
+                  <strong>25% Advance Paid: </strong> Rs {advanceNum.toFixed(2)} 
+                  <span className="block text-xs text-gray-500">Remaining Due on Delivery: Rs {remainingNum.toFixed(2)}</span>
+                </p>
+              ) : (
+                <p className="text-amber-600 font-medium">
+                  <strong>25% Advance Option: </strong> Rs {advanceNum.toFixed(2)}
+                  <span className="block text-xs text-gray-500">COD (No proof uploaded yet)</span>
                 </p>
               )}
 
@@ -239,7 +248,6 @@ const OrderPage = () => {
      <Link className="mt-4 underline text-blue-400" to={"/"}>Go to Home Page</Link>
      </p>
       )}
-    
     </div>
   );
 };

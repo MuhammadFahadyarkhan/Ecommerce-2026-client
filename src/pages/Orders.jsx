@@ -115,8 +115,19 @@ const Orders = () => {
           const isRejected = order.status?.toLowerCase().includes("rejected");
           const isCodWithoutProof = order.method?.toLowerCase() === "cod" && !order.paymentProof && !isRejected;
 
-          // Uses the accurate discounted subtotal stored directly by the backend database
-          const finalSubTotal = order.subTotal;
+          // 🛡️ Fallback calculation: compute discounted subtotal safely
+          const computedSubTotal = order.items?.reduce((acc, item) => {
+            const prod = item.product || item; 
+            const price = prod.price || item.price || 0;
+            const discountPercent = prod.discountPercent || prod.discount || item.discountPercent || 0;
+            const discountedPrice = discountPercent > 0 
+              ? price * (1 - discountPercent / 100) 
+              : price;
+            const qty = item.quantity || 1;
+            return acc + (discountedPrice * qty);
+          }, 0);
+
+          const finalSubTotal = computedSubTotal > 0 ? computedSubTotal : order.subTotal;
           const advanceAmount = (finalSubTotal * 0.25).toFixed(2);
 
           return (
@@ -150,7 +161,6 @@ const Orders = () => {
                     <strong>Placed At: </strong> {formattedDate}
                   </p>
 
-                  {/* COD Upgrade Option (Hidden if rejected) */}
                   {isCodWithoutProof && (
                     <div className="mt-4 p-3 border border-amber-200 bg-amber-50 dark:bg-amber-950/20 rounded-lg space-y-2">
                       <p className="text-xs font-medium text-amber-900 dark:text-amber-200">

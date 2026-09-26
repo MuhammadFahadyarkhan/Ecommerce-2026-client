@@ -106,7 +106,7 @@ const Products = () => {
             />
           </div>
 
-          <div className="mb-4">
+      <div className="mb-4">
             <label className="block text-sm font-medium mb-2">Category</label>
             <select
               className="w-full p-2 border rounded-md dark:bg-gray-900 dark:text-white text-sm"
@@ -114,11 +114,14 @@ const Products = () => {
               onChange={handleCategoryChange}
             >
               <option value="">All</option>
-              {categories.map((e) => (
-                <option value={e} key={e}>
-                  {e}
-                </option>
-              ))}
+              {categories.map((e, index) => {
+                const catName = typeof e === "string" ? e : e.name;
+                return (
+                  <option value={catName} key={e._id || index}>
+                    {catName}
+                  </option>
+                );
+              })}
             </select>
           </div>
 

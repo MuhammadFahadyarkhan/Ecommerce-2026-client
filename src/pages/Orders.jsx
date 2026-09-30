@@ -75,16 +75,16 @@ const Orders = () => {
     switch (status?.toLowerCase()) {
       case "pending":
       case "awaiting admin approval":
-        return "text-yellow-500";
+        return "text-amber-500 dark:text-amber-400";
       case "approved":
       case "shipped":
       case "delivered":
-        return "text-green-500";
+        return "text-emerald-600 dark:text-emerald-400";
       case "rejected by seller":
       case "rejected by buyer":
-        return "text-red-500";
+        return "text-rose-600 dark:text-rose-400";
       default:
-        return "text-gray-500";
+        return "text-slate-500 dark:text-slate-400";
     }
   };
 
@@ -94,16 +94,21 @@ const Orders = () => {
 
   if (orders.length === 0) {
     return (
-      <div className="min-h-[70vh] flex flex-col items-center justify-center text-center">
-        <h1 className="text-2xl font-bold text-gray-600">No Orders Yet</h1>
-        <Button onClick={() => navigate("/products")}>Shop Now</Button>
+      <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-4">
+        <h1 className="text-2xl font-bold text-slate-700 dark:text-slate-300 mb-4">No Orders Yet</h1>
+        <Button 
+          onClick={() => navigate("/products")}
+          className="bg-black hover:bg-zinc-800 text-white dark:bg-white dark:text-black dark:hover:bg-zinc-200 rounded-xl px-6"
+        >
+          Shop Now
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-6 px-4 min-h-[70vh]">
-      <div className="text-3xl font-bold mb-6 text-center">Your Orders</div>
+    <div className="container mx-auto py-8 px-4 min-h-[70vh] max-w-7xl">
+      <div className="text-3xl font-bold mb-8 text-center text-slate-900 dark:text-white tracking-tight">Your Orders</div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {orders.map((order) => {
@@ -115,14 +120,12 @@ const Orders = () => {
           const isRejected = order.status?.toLowerCase().includes("rejected");
           const isDelivered = order.status?.toLowerCase() === "delivered";
           
-          // 🛡️ Hide 25% advance prompt if order is delivered, rejected, or already has proof
           const isCodWithoutProof = 
             order.method?.toLowerCase() === "cod" && 
             !order.paymentProof && 
             !isRejected && 
             !isDelivered;
 
-          // 🛡️ Fallback calculation: compute discounted subtotal safely
           const computedSubTotal = order.items?.reduce((acc, item) => {
             const prod = item.product || item; 
             const price = prod.price || item.price || 0;
@@ -140,48 +143,52 @@ const Orders = () => {
           return (
             <Card
               key={order._id}
-              className="border border-slate-200 shadow-sm hover:shadow-lg transition-shadow duration-200 p-6 outline-none ring-0 focus:ring-0 flex flex-col justify-between"
+              className="border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm hover:shadow-md transition-all duration-200 p-6 rounded-2xl flex flex-col justify-between"
             >
               <div>
-                <CardHeader className="p-0 pb-4">
-                  <CardTitle className="text-lg font-normal">
+                <CardHeader className="p-0 pb-4 border-b border-slate-100 dark:border-zinc-900 mb-4">
+                  <CardTitle className="text-base font-semibold text-slate-900 dark:text-white">
                     Order #{order._id.toUpperCase()}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-0 space-y-1">
-                  <p>
-                    <strong>Method: </strong> {order.method}
-                  </p>
-                  <p>
-                    <strong>Status: </strong>
+                <CardContent className="p-0 space-y-2.5 text-sm text-slate-600 dark:text-slate-300">
+                  <div className="flex justify-between">
+                    <span className="font-medium text-slate-500 dark:text-slate-400">Method:</span>
+                    <span className="uppercase text-slate-900 dark:text-white font-medium">{order.method}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-slate-500 dark:text-slate-400">Status:</span>
                     <span className={`font-semibold ${getStatusTextColor(order.status)}`}>
                       {order.status}
                     </span>
-                  </p>
-                  <p>
-                    <strong>Total Items: </strong> {order.items.length}
-                  </p>
-                  <p>
-                    <strong>SubTotal: </strong> Rs {Number(finalSubTotal).toFixed(2)}
-                  </p>
-                  <p>
-                    <strong>Placed At: </strong> {formattedDate}
-                  </p>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-medium text-slate-500 dark:text-slate-400">Total Items:</span>
+                    <span className="text-slate-900 dark:text-white font-medium">{order.items.length}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-medium text-slate-500 dark:text-slate-400">SubTotal:</span>
+                    <span className="text-slate-900 dark:text-white font-semibold">Rs {Number(finalSubTotal).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-medium text-slate-500 dark:text-slate-400">Placed At:</span>
+                    <span className="text-slate-900 dark:text-white font-medium">{formattedDate}</span>
+                  </div>
 
                   {isCodWithoutProof && (
-                    <div className="mt-4 p-3 border border-amber-200 bg-amber-50 dark:bg-amber-950/20 rounded-lg space-y-2">
-                      <p className="text-xs font-medium text-amber-900 dark:text-amber-200">
-                        Want 25% Advance? Transfer <strong>Rs {advanceAmount}</strong> and upload screenshot:
+                    <div className="mt-4 p-4 border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900/50 rounded-xl space-y-3">
+                      <p className="text-xs font-medium text-slate-700 dark:text-slate-300 leading-relaxed">
+                        Want 25% Advance? Transfer <strong className="text-slate-900 dark:text-white">Rs {advanceAmount}</strong> and upload screenshot:
                       </p>
                       <Input
                         type="file"
                         accept="image/*"
                         onChange={(e) => handleFileChange(order._id, e.target.files[0])}
-                        className="bg-white dark:bg-gray-900 text-xs h-9"
+                        className="bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-xs h-9 cursor-pointer rounded-lg"
                       />
                       <Button
                         size="sm"
-                        className="w-full mt-1 bg-amber-600 hover:bg-amber-700 text-white"
+                        className="w-full bg-black hover:bg-zinc-800 text-white dark:bg-white dark:text-black dark:hover:bg-zinc-200 rounded-xl font-medium text-xs h-9 transition-colors"
                         disabled={uploadingId === order._id}
                         onClick={() => handleUploadProof(order._id)}
                       >
@@ -191,15 +198,15 @@ const Orders = () => {
                   )}
 
                   {order.paymentProof && (
-                    <div className="mt-2 text-xs">
-                      <span className="font-semibold text-green-600">Payment Proof Submitted</span>
+                    <div className="mt-3 py-2 px-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50 rounded-xl text-center">
+                      <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">Payment Proof Submitted</span>
                     </div>
                   )}
                 </CardContent>
               </div>
 
               <Button
-                className="mt-6 outline-none ring-0 focus:ring-0 focus-visible:ring-0 w-full"
+                className="mt-6 w-full bg-black hover:bg-zinc-800 text-white dark:bg-white dark:text-black dark:hover:bg-zinc-200 rounded-xl font-medium text-sm transition-colors"
                 onClick={() => navigate(`/order/${order._id}`)}
               >
                 View Details

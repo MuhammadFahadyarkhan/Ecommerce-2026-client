@@ -111,7 +111,7 @@ const OrderPage = () => {
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Receipt - #${order._id.toUpperCase()}</title>
+          <title>Receipt - ${order._id.toUpperCase()}</title>
           <style>
             body { font-family: 'Courier New', Courier, monospace; padding: 30px; color: #000; background: #fff; max-width: 550px; margin: auto; }
             .header { text-align: center; border-bottom: 3px dashed #000; padding-bottom: 20px; margin-bottom: 22px; }
@@ -123,7 +123,7 @@ const OrderPage = () => {
         <body>
           <div class="header">
             <h2 style="margin: 0 0 8px 0; font-size: 26px; letter-spacing: 1px;">STORE RECEIPT</h2>
-            <p style="margin: 4px 0; font-size: 15px;"><strong>Order ID:</strong> #${order._id.toUpperCase()}</p>
+            <p style="margin: 4px 0; font-size: 15px;"><strong>Order ID:</strong> ${order._id.toUpperCase()}</p>
             <p style="margin: 4px 0; font-size: 15px;"><strong>Date:</strong> ${formattedDate}</p>
           </div>
 

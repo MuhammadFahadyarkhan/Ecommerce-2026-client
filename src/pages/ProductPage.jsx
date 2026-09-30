@@ -13,7 +13,7 @@ import Cookies from "js-cookie";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useParams, useNavigate } from "react-router-dom";
-import { X, Edit, Loader, Trash2, Star } from "lucide-react";
+import { X, Edit, Loader, Trash2, Star, Share2, ShieldCheck, Truck, RefreshCw, Plus, Minus } from "lucide-react";
 
 const ProductPage = () => {
   const { fetchProduct, fetchProducts, products, product, relatedProduct, reviews, reviewStats, loading } = ProductData();
@@ -25,6 +25,9 @@ const ProductPage = () => {
   // Dynamic categories extracted from database products with a safe fallback
   const dynamicCategories = [...new Set(products?.map((p) => p.category).filter(Boolean))];
   const categories = dynamicCategories.length > 0 ? dynamicCategories : ["Electronics", "Clothing", "Books", "Home", "Other"];
+
+  // Quantity states
+  const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
     fetchProduct(id);
@@ -42,7 +45,33 @@ const ProductPage = () => {
   }, [user]);
 
   const addToCartHandler = () => {
-    addToCart(product);
+    // If your CartContext supports multi-quantity object:
+    addToCart({ ...product, quantity });
+    
+    // OR if your CartContext adds 1 at a time and you want it to match the counter visually:
+    // for (let i = 0; i < quantity; i++) {
+    //   addToCart(product);
+    // }
+
+    toast.success(`Added ${quantity} item(s) to cart!`);
+  };
+
+  const handleShare = async () => {
+    const shareData = {
+      title: product?.title,
+      text: product?.description,
+      url: window.location.href,
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success("Product link copied to clipboard!");
+      }
+    } catch (err) {
+      console.log("Error sharing:", err);
+    }
   };
 
   const [show, setShow] = useState(false);
@@ -78,7 +107,7 @@ const ProductPage = () => {
       setDescription(product.description || "");
       setStock(product.stock || "");
       setPrice(product.price || "");
-      setDiscount(product.discountPercent || product.discount || ""); // Fixed mapping to match DB schema
+      setDiscount(product.discountPercent || product.discount || "");
     }
   };
 
@@ -93,7 +122,7 @@ const ProductPage = () => {
           title, 
           description, 
           price, 
-          discountPercent: discount, // Send as discountPercent to align with MongoDB schema
+          discountPercent: discount,
           stock, 
           category 
         },
@@ -260,7 +289,6 @@ const ProductPage = () => {
     );
   };
 
-  // Calculate discount metrics correctly using discountPercent
   const discountPercent = product?.discountPercent || product?.discount || 0;
   const hasDiscount = discountPercent > 0;
   const discountedPrice = hasDiscount 
@@ -372,7 +400,7 @@ const ProductPage = () => {
                   <CarouselContent>
                     {product?.images?.map((image, index) => (
                       <CarouselItem key={index}>
-                        <img src={image.url} alt="image" className="w-full rounded-md object-cover" />
+                        <img src={image.url} alt="image" className="w-full rounded-md object-cover shadow-sm" />
                       </CarouselItem>
                     ))}
                   </CarouselContent>
@@ -402,11 +430,23 @@ const ProductPage = () => {
               </div>
 
               <div className="w-full lg:w-1/2 space-y-5">
-                {product.category && (
-                  <span className="inline-block text-xs font-semibold tracking-wider uppercase px-2.5 py-1 rounded bg-slate-100 dark:bg-zinc-900 text-slate-700 dark:text-slate-300">
-                    {product.category}
-                  </span>
-                )}
+                <div className="flex items-center justify-between">
+                  {product.category && (
+                    <span className="inline-block text-xs font-semibold tracking-wider uppercase px-2.5 py-1 rounded bg-slate-100 dark:bg-zinc-900 text-slate-700 dark:text-slate-300">
+                      {product.category}
+                    </span>
+                  )}
+                  <div className="flex items-center gap-2">
+                    {/* Heart wishlist button removed here */}
+                    <button
+                      onClick={handleShare}
+                      className="p-2 rounded-full border border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors"
+                      title="Share Product"
+                    >
+                      <Share2 size={18} className="text-slate-600 dark:text-slate-400" />
+                    </button>
+                  </div>
+                </div>
 
                 <div className="flex items-center gap-3">
                   <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">{product.title}</h1>
@@ -452,22 +492,62 @@ const ProductPage = () => {
                   </p>
                 </div>
 
+                {/* Quantity Counter & Controls */}
+                {isAuth && product.stock > 0 && (
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Quantity:</span>
+                    <div className="flex items-center border border-slate-200 dark:border-zinc-800 rounded-md">
+                      <button 
+                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                        className="p-2 hover:bg-slate-100 dark:hover:bg-zinc-900 transition-colors"
+                      >
+                        <Minus size={14} />
+                      </button>
+                      <span className="px-4 text-sm font-semibold">{quantity}</span>
+                      <button 
+                        onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+                        className="p-2 hover:bg-slate-100 dark:hover:bg-zinc-900 transition-colors"
+                      >
+                        <Plus size={14} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 {isAuth ? (
                   <>
                     {product.stock <= 0 ? (
                       <p className="text-red-600 text-xl font-semibold">Out of Stock</p>
                     ) : (
-                      <Button onClick={addToCartHandler} className="bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200">Add To Cart</Button>
+                      <Button onClick={addToCartHandler} className="w-full sm:w-auto bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 px-8 py-3">
+                        Add To Cart
+                      </Button>
                     )}
                   </>
                 ) : (
                   <p className="text-blue-500 text-sm">Please Login to add something in cart</p>
                 )}
+
+                {/* Trust Badges / Perks */}
+                <div className="grid grid-cols-3 gap-3 pt-4 border-t border-slate-200 dark:border-zinc-800 text-xs text-slate-600 dark:text-slate-400">
+                  <div className="flex flex-col items-center text-center gap-1.5 p-2 rounded-lg bg-slate-50 dark:bg-zinc-950">
+                    <Truck size={18} className="text-slate-800 dark:text-slate-200" />
+                    <span>Fast Delivery</span>
+                  </div>
+                  <div className="flex flex-col items-center text-center gap-1.5 p-2 rounded-lg bg-slate-50 dark:bg-zinc-950">
+                    <ShieldCheck size={18} className="text-slate-800 dark:text-slate-200" />
+                    <span>Secure Warranty</span>
+                  </div>
+                  <div className="flex flex-col items-center text-center gap-1.5 p-2 rounded-lg bg-slate-50 dark:bg-zinc-950">
+                    <RefreshCw size={18} className="text-slate-800 dark:text-slate-200" />
+                    <span>Easy Returns</span>
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
-          {/* Dynamic Reviews Section UI */}
+          {/* Reviews Section UI */}
           <div className="mt-16 border-t dark:border-zinc-800 pt-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
               <div>
@@ -507,13 +587,11 @@ const ProductPage = () => {
 
             <hr className="border-gray-300 dark:border-zinc-800 mb-6" />
 
-            {/* Render List of Dynamic Reviews formatted as requested */}
             <div className="space-y-6">
               {reviews && reviews.length > 0 ? (
                 reviews.map((rev) => (
                   <div key={rev._id} className="pb-6 border-b border-gray-100 dark:border-zinc-900 last:border-none">
                     <div className="flex flex-col">
-                      {/* Header Row with Name/Location & Admin Delete Button */}
                       <div className="flex justify-between items-start">
                         <div className="flex flex-wrap items-center gap-1 text-sm">
                           <span className="font-semibold text-slate-900 dark:text-white">
@@ -535,7 +613,6 @@ const ProductPage = () => {
                         )}
                       </div>
 
-                      {/* Date & Rating Stars */}
                       <div className="flex items-center gap-2 mt-1 text-xs text-slate-500">
                         <span>
                           {new Date(rev.createdAt).toLocaleDateString("en-US", {
@@ -563,21 +640,18 @@ const ProductPage = () => {
                         </span>
                       </div>
 
-                      {/* Review Title */}
                       {rev.title && (
                         <h4 className="font-medium text-slate-900 dark:text-white mt-2 text-sm">
                           {rev.title}
                         </h4>
                       )}
 
-                      {/* Comment Body */}
                       {rev.comment && (
                         <p className="text-slate-700 dark:text-slate-300 text-sm mt-1 leading-relaxed">
                           {rev.comment}
                         </p>
                       )}
 
-                      {/* Recommendation Status */}
                       {rev.recommend && (
                         <p className="text-xs text-slate-600 dark:text-slate-400 mt-2 font-medium">
                           I would recommend this to a friend!

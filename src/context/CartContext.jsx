@@ -15,7 +15,7 @@ export const CartProvider = ({ children }) => {
   async function fetchCart() {
     const token = Cookies.get("token");
     if (!token) return; 
-    setLoading(true)
+    setLoading(true);
     try {
       const { data } = await axios.get(`${server}/api/cart/all`, {
         headers: {
@@ -32,23 +32,26 @@ export const CartProvider = ({ children }) => {
     }
   }
 
-   async function addToCart(product) {
+  async function addToCart(product, quantity = 1) {
     const token = Cookies.get("token");
     setLoading(true);
-  try {
-    const { data } = await axios.post(
-      `${server}/api/cart/add`,
-      { product },
-      {
-        headers: {
-          token,
+    try {
+      const { data } = await axios.post(
+        `${server}/api/cart/add`,
+        { 
+          product: product._id || product, 
+          quantity 
         },
-      }
-    );
-    toast.success(data.message);
+        {
+          headers: {
+            token,
+          },
+        }
+      );
+      toast.success(data.message || `Added ${quantity} item(s) to cart`);
       fetchCart();
     } catch (error) {
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || "Failed to add to cart");
     } finally {
       setLoading(false); 
     }
@@ -56,42 +59,44 @@ export const CartProvider = ({ children }) => {
 
   async function updateCart(action, id){
     const token = Cookies.get("token");
-  try {
-    const {data} = await axios.post(`${server}/api/cart/update?action=${action}`,{id},
-      {
-      headers:{
-       token,
-      }
+    try {
+      const {data} = await axios.post(`${server}/api/cart/update?action=${action}`, {id},
+        {
+          headers:{
+             token,
+          }
+        }
+      );
+      fetchCart();
+    } catch (error) {
+      toast.error(error.response?.data?.message);
     }
-    )
-    fetchCart()
-  } catch (error) {
-    toast.error(error.response.data.message);
   }
-}
-async function removeFromCart(id){
-  const token = Cookies.get("token");
-  try {
-    const { data } = await axios.get(
-      `${server}/api/cart/remove/${id}`,
-      {
-        headers: {
-          token,
-        },
-      }
-    );
-    toast.success(data.message);
-    fetchCart();
-  } catch (error) {
-    toast.error(error.response.data.message);
+
+  async function removeFromCart(id){
+    const token = Cookies.get("token");
+    try {
+      const { data } = await axios.get(
+        `${server}/api/cart/remove/${id}`,
+        {
+          headers: {
+            token,
+          },
+        }
+      );
+      toast.success(data.message);
+      fetchCart();
+    } catch (error) {
+      toast.error(error.response?.data?.message);
+    }
   }
-}
 
   useEffect(()=>{
-    fetchCart()
+    fetchCart();
   }, []);
+
   return (
-    <CartContext.Provider value={{ cart, fetchCart, totalItem, subTotal,addToCart,setTotalItem,updateCart,removeFromCart }}>
+    <CartContext.Provider value={{ cart, fetchCart, totalItem, subTotal, addToCart, setTotalItem, updateCart, removeFromCart }}>
       {children}
     </CartContext.Provider>
   );

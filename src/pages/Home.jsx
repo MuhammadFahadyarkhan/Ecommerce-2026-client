@@ -85,14 +85,14 @@ const Home = () => {
                       )}
                     </div>
                     {/* Category Name Label */}
-                    <span className="mt-2 text-xs sm:text-sm md:text-base font-semibold text-gray-800 capitalize text-center max-w-[90px] sm:max-w-[110px] truncate">
+                    <span className="mt-2 text-xs sm:text-sm md:text-base font-semibold text-gray-800 dark:text-white capitalize text-center max-w-[90px] sm:max-w-[110px] truncate">
                       {catName}
                     </span>
                   </div>
                 );
               })
             ) : (
-              <p className="text-xs text-gray-500 text-center w-full">No categories found.</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 text-center w-full">No categories found.</p>
             )}
           </div>
 
@@ -119,7 +119,7 @@ const Home = () => {
               return <ProductCard key={e._id} product={e} latest={"yes"} />;
             })
           ) : (
-            <p>No Products Yet</p>
+            <p className="dark:text-gray-300">No Products Yet</p>
           )}
         </div>
       </div>

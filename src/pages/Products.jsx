@@ -82,7 +82,7 @@ const Products = () => {
 
       {/* Sidebar Filter Component */}
       <div
-        className={`z-50 bg-white dark:bg-gray-900 shadow-lg transition-transform duration-300 ease-in-out shrink-0 w-64 fixed inset-y-0 left-0 md:relative md:translate-x-0 ${
+        className={`z-50 bg-white dark:bg-black shadow-lg transition-transform duration-300 ease-in-out shrink-0 w-64 fixed inset-y-0 left-0 md:relative md:translate-x-0 ${
           show ? "translate-x-0" : "-translate-x-full"
         }`}
       >

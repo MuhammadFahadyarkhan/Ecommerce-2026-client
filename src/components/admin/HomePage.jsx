@@ -169,20 +169,22 @@ const HomePage = () => {
                 <label className="text-sm font-medium">Category</label>
                 <select
                   name="categorySelect"
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 bg-background text-foreground dark:bg-zinc-950 dark:text-zinc-50"
                   onChange={handleChange}
                   value={isNewCategory ? "add_new_custom" : formData.category}
                   required
                 >
-                  <option value="" disabled>
+                  <option value="" disabled className="bg-background text-foreground dark:bg-zinc-900 dark:text-zinc-100">
                     Select a category
                   </option>
                   {categories && categories.map((cat, index) => (
-                    <option key={index} value={cat}>
+                    <option key={index} value={cat} className="bg-background text-foreground dark:bg-zinc-900 dark:text-zinc-100">
                       {cat}
                     </option>
                   ))}
-                  <option value="add_new_custom">➕ Add New Category...</option>
+                  <option value="add_new_custom" className="bg-background text-foreground dark:bg-zinc-900 dark:text-zinc-100">
+                    ➕ Add New Category...
+                  </option>
                 </select>
               </div>
 

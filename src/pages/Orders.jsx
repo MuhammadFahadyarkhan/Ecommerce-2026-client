@@ -113,7 +113,14 @@ const Orders = () => {
           ).padStart(2, "0")}/${date.getFullYear()}`;
 
           const isRejected = order.status?.toLowerCase().includes("rejected");
-          const isCodWithoutProof = order.method?.toLowerCase() === "cod" && !order.paymentProof && !isRejected;
+          const isDelivered = order.status?.toLowerCase() === "delivered";
+          
+          // 🛡️ Hide 25% advance prompt if order is delivered, rejected, or already has proof
+          const isCodWithoutProof = 
+            order.method?.toLowerCase() === "cod" && 
+            !order.paymentProof && 
+            !isRejected && 
+            !isDelivered;
 
           // 🛡️ Fallback calculation: compute discounted subtotal safely
           const computedSubTotal = order.items?.reduce((acc, item) => {

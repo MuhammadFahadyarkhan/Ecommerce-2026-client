@@ -276,7 +276,7 @@ const ProductPage = () => {
           {user && user.role === "admin" && (
             <div className="w-full max-w-[450px] m-auto mb-5">
               <div className="flex gap-4">
-                <Button onClick={updateHandler} className="flex-1">
+                <Button onClick={updateHandler} className="flex-1 bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200">
                   {show ? <X className="mr-2 h-4 w-4" /> : <Edit className="mr-2 h-4 w-4" />}
                   {show ? "Cancel" : "Edit Product"}
                 </Button>
@@ -314,7 +314,7 @@ const ProductPage = () => {
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
                       required
-                      className="w-full p-2 border rounded-md dark:bg-gray-900 dark:text-white"
+                      className="w-full p-2 border rounded-md dark:bg-zinc-950 dark:border-zinc-800 dark:text-white"
                     >
                       <option value="" disabled>Select Category</option>
                       {categories.map((cat) => (
@@ -355,7 +355,7 @@ const ProductPage = () => {
                   </div>
                   <Button
                     type="submit"
-                    className="w-full"
+                    className="w-full bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
                     disabled={btnLoading}
                   >
                     {btnLoading ? <Loader className="animate-spin" /> : "Update Product"}
@@ -394,7 +394,7 @@ const ProductPage = () => {
                         className="block w-full mt-1 text-sm"
                       />
                     </div>
-                    <Button type="submit" disabled={btnLoading}>
+                    <Button type="submit" disabled={btnLoading} className="bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200">
                       {btnLoading ? <Loader className="animate-spin" /> : "Update Image"}
                     </Button>
                   </form>
@@ -403,7 +403,7 @@ const ProductPage = () => {
 
               <div className="w-full lg:w-1/2 space-y-5">
                 {product.category && (
-                  <span className="inline-block text-xs font-semibold tracking-wider uppercase px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                  <span className="inline-block text-xs font-semibold tracking-wider uppercase px-2.5 py-1 rounded bg-slate-100 dark:bg-zinc-900 text-slate-700 dark:text-slate-300">
                     {product.category}
                   </span>
                 )}
@@ -424,7 +424,7 @@ const ProductPage = () => {
                       <Star 
                         key={i} 
                         size={16} 
-                        className={i < Math.round(reviewStats?.averageRating || 0) ? "fill-amber-400" : "text-gray-300 dark:text-gray-600"} 
+                        className={i < Math.round(reviewStats?.averageRating || 0) ? "fill-amber-400" : "text-gray-300 dark:text-gray-700"} 
                       />
                     ))}
                   </div>
@@ -445,7 +445,7 @@ const ProductPage = () => {
                   )}
                 </div>
 
-                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2">
+                <div className="p-4 rounded-xl bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 space-y-2">
                   <h3 className="text-xs font-bold tracking-wider uppercase text-slate-500 dark:text-slate-400">Product Description</h3>
                   <p className="text-sm sm:text-base leading-relaxed text-slate-700 dark:text-slate-300">
                     {product.description}
@@ -457,7 +457,7 @@ const ProductPage = () => {
                     {product.stock <= 0 ? (
                       <p className="text-red-600 text-xl font-semibold">Out of Stock</p>
                     ) : (
-                      <Button onClick={addToCartHandler}>Add To Cart</Button>
+                      <Button onClick={addToCartHandler} className="bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200">Add To Cart</Button>
                     )}
                   </>
                 ) : (
@@ -468,7 +468,7 @@ const ProductPage = () => {
           )}
 
           {/* Dynamic Reviews Section UI */}
-          <div className="mt-16 border-t pt-8">
+          <div className="mt-16 border-t dark:border-zinc-800 pt-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
               <div>
                 <h2 className="text-xl font-bold">Customer Reviews</h2>
@@ -478,7 +478,7 @@ const ProductPage = () => {
                       <Star 
                         key={i} 
                         size={16} 
-                        className={i < Math.round(reviewStats?.averageRating || 0) ? "fill-amber-400" : "text-gray-300 dark:text-gray-600"} 
+                        className={i < Math.round(reviewStats?.averageRating || 0) ? "fill-amber-400" : "text-gray-300 dark:text-gray-700"} 
                       />
                     ))}
                   </div>
@@ -499,19 +499,19 @@ const ProductPage = () => {
                   }
                   setShowReviewModal(true);
                 }}
-                className="px-6 py-2.5 rounded-full bg-[#4A5D4E] hover:bg-[#3B4C3F] text-white font-medium text-sm transition-colors shadow-sm"
+                className="px-6 py-2.5 rounded-full bg-black hover:bg-zinc-800 text-white dark:bg-white dark:text-black dark:hover:bg-zinc-200 font-medium text-sm transition-colors shadow-sm"
               >
                 Write a review
               </button>
             </div>
 
-            <hr className="border-gray-300 mb-6" />
+            <hr className="border-gray-300 dark:border-zinc-800 mb-6" />
 
             {/* Render List of Dynamic Reviews formatted as requested */}
             <div className="space-y-6">
               {reviews && reviews.length > 0 ? (
                 reviews.map((rev) => (
-                  <div key={rev._id} className="pb-6 border-b border-gray-100 dark:border-slate-800 last:border-none">
+                  <div key={rev._id} className="pb-6 border-b border-gray-100 dark:border-zinc-900 last:border-none">
                     <div className="flex flex-col">
                       {/* Header Row with Name/Location & Admin Delete Button */}
                       <div className="flex justify-between items-start">
@@ -553,7 +553,7 @@ const ProductPage = () => {
                               className={
                                 i < (rev.ratings?.overall || 5)
                                   ? "fill-amber-400 text-amber-400"
-                                  : "text-gray-300 dark:text-gray-600"
+                                  : "text-gray-300 dark:text-gray-700"
                               }
                             />
                           ))}
@@ -596,8 +596,8 @@ const ProductPage = () => {
 
       {/* Review Modal Pop-up */}
       {showReviewModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden relative p-6 sm:p-8 my-8">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-zinc-950 border dark:border-zinc-800 w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden relative p-6 sm:p-8 my-8">
             <button
               onClick={() => setShowReviewModal(false)}
               className="absolute top-5 right-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
@@ -644,7 +644,7 @@ const ProductPage = () => {
                     </div>
                   </div>
 
-                  <div className="border-t pt-4 mt-2">
+                  <div className="border-t dark:border-zinc-800 pt-4 mt-2">
                     <h4 className="text-xs font-bold tracking-wider uppercase text-slate-500 mb-3">My Rating</h4>
                     <div className="space-y-3">
                       <div className="flex justify-between items-center text-sm">
@@ -704,14 +704,14 @@ const ProductPage = () => {
                       rows={5}
                       value={reviewComment}
                       onChange={(e) => setReviewComment(e.target.value)}
-                      className="w-full p-3 text-sm border rounded-md dark:bg-slate-950 dark:border-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#4A5D4E]"
+                      className="w-full p-3 text-sm border rounded-md dark:bg-zinc-950 dark:border-zinc-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
                     ></textarea>
                   </div>
 
                   <button
                     type="submit"
                     disabled={reviewSubmitting}
-                    className="w-full py-3 rounded-full bg-[#4A5D4E] hover:bg-[#3B4C3F] text-white font-medium text-sm transition-colors shadow-sm mt-4 flex items-center justify-center"
+                    className="w-full py-3 rounded-full bg-black hover:bg-zinc-800 text-white dark:bg-white dark:text-black dark:hover:bg-zinc-200 font-medium text-sm transition-colors shadow-sm mt-4 flex items-center justify-center"
                   >
                     {reviewSubmitting ? <Loader className="animate-spin h-5 w-5" /> : "Submit"}
                   </button>

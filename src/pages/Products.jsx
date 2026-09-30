@@ -24,17 +24,15 @@ const Products = () => {
     setPage,
     products,
     loading,
-    fetchProducts, // Ensure this is exported from your ProductContext to trigger a background sync if needed
+    fetchProducts,
   } = ProductData();
 
-  // Re-fetch products when mounting or when returning to this page so ratings are always fresh
   useEffect(() => {
     if (fetchProducts) {
       fetchProducts();
     }
   }, []);
 
-  // Sync URL Query Parameter to Context Category on mount or URL change
   useEffect(() => {
     const urlCategory = searchParams.get("category");
     if (urlCategory) {
@@ -48,7 +46,6 @@ const Products = () => {
     }
   }, [searchParams]);
 
-  // Handle manual category change from sidebar dropdown
   const handleCategoryChange = (e) => {
     const val = e.target.value;
     setCategory(val);
@@ -89,7 +86,7 @@ const Products = () => {
         <div className="p-4 relative">
           <button
             onClick={() => setShow(false)}
-            className="absolute top-4 right-4 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-full p-2 md:hidden"
+            className="absolute top-4 right-4 bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-white rounded-full p-2 md:hidden"
           >
             <X size={18} />
           </button>
@@ -100,16 +97,16 @@ const Products = () => {
             <input
               type="text"
               placeholder="Search Title"
-              className="w-full p-2 border rounded-full bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm"
+              className="w-full p-2 border rounded-full bg-white dark:bg-neutral-900 border-gray-200 dark:border-neutral-800 text-gray-900 dark:text-white text-sm"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
 
-      <div className="mb-4">
+          <div className="mb-4">
             <label className="block text-sm font-medium mb-2">Category</label>
             <select
-              className="w-full p-2 border rounded-md dark:bg-gray-900 dark:text-white text-sm"
+              className="w-full p-2 border rounded-md bg-white dark:bg-neutral-900 border-gray-200 dark:border-neutral-800 dark:text-white text-sm"
               value={category}
               onChange={handleCategoryChange}
             >
@@ -128,7 +125,7 @@ const Products = () => {
           <div className="mb-4">
             <label className="block text-sm font-medium mb-2">Price</label>
             <select
-              className="w-full p-2 border rounded-md dark:bg-gray-900 dark:text-white text-sm"
+              className="w-full p-2 border rounded-md bg-white dark:bg-neutral-900 border-gray-200 dark:border-neutral-800 dark:text-white text-sm"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
             >

@@ -55,7 +55,16 @@ const Footer = () => {
               >
                 Products
               </button>
-              {isAuth && (
+              
+              {/* Always visible Policies link */}
+              <button 
+                onClick={() => navigate("/policies")} 
+                className="px-3 py-1.5 rounded-xl hover:text-black dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all duration-200 cursor-pointer text-center md:text-left"
+              >
+                Policies
+              </button>
+
+              {isAuth ? (
                 <>
                   <button 
                     onClick={() => navigate("/cart")} 
@@ -69,13 +78,14 @@ const Footer = () => {
                   >
                     Orders
                   </button>
-                   <button 
-                    onClick={() => navigate("/policies")} 
-                    className="px-3 py-1.5 rounded-xl hover:text-black dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all duration-200 cursor-pointer text-center md:text-left"
-                  >
-                    Policies
-                  </button>
                 </>
+              ) : (
+                <button 
+                  onClick={() => navigate("/login")} 
+                  className="px-3 py-1.5 rounded-xl hover:text-black dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all duration-200 cursor-pointer text-center md:text-left"
+                >
+                  Login
+                </button>
               )}
             </div>
           </div>

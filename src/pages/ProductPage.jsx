@@ -13,7 +13,7 @@ import Cookies from "js-cookie";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useParams, useNavigate } from "react-router-dom";
-import { X, Edit, Loader, Trash2, Star, Share2, ShieldCheck, Truck, RefreshCw, Plus, Minus } from "lucide-react";
+import { X, Edit, Loader, Trash2, Star, Share2, ShieldCheck, Truck, RefreshCw, Plus, Minus, MessageCircle } from "lucide-react";
 
 const ProductPage = () => {
   const { fetchProduct, fetchProducts, products, product, relatedProduct, reviews, reviewStats, loading } = ProductData();
@@ -36,6 +36,42 @@ const ProductPage = () => {
     }
   }, [id]);
 
+  // Dynamically update Open Graph (OG) Meta tags for proper Facebook & Messenger previews
+  useEffect(() => {
+    if (!product) return;
+
+    const originalTitle = document.title;
+    document.title = product.title || originalTitle;
+
+    const setMetaTag = (property, content) => {
+      if (!content) return;
+      let element = document.querySelector(`meta[property="${property}"]`) || document.querySelector(`meta[name="${property}"]`);
+      if (!element) {
+        element = document.createElement('meta');
+        if (property.startsWith('og:')) {
+          element.setAttribute('property', property);
+        } else {
+          element.setAttribute('name', property);
+        }
+        document.head.appendChild(element);
+      }
+      element.setAttribute('content', content);
+    };
+
+    const productUrl = window.location.href;
+    const productImage = product.images?.[0]?.url || "";
+
+    setMetaTag('og:title', product.title);
+    setMetaTag('og:description', product.description);
+    setMetaTag('og:image', productImage);
+    setMetaTag('og:url', productUrl);
+    setMetaTag('og:type', 'website');
+
+    return () => {
+      document.title = originalTitle;
+    };
+  }, [product]);
+
   // Sync user details to review form once user data loads
   useEffect(() => {
     if (user) {
@@ -45,10 +81,10 @@ const ProductPage = () => {
   }, [user]);
 
   const addToCartHandler = () => {
-    // Pass product and quantity separately to match your CartContext signature: addToCart(product, quantity)
     addToCart(product, quantity);
   };
 
+  // General Share Handler (uses native mobile share sheet if available, or copies link)
   const handleShare = async () => {
     const shareData = {
       title: product?.title,
@@ -64,6 +100,25 @@ const ProductPage = () => {
       }
     } catch (err) {
       console.log("Error sharing:", err);
+    }
+  };
+
+  // Facebook Share Dialog handler (Works once hosted on a public domain with OG tags)
+  const handleFacebookShare = () => {
+    const url = encodeURIComponent(window.location.href);
+    const fbShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+    window.open(fbShareUrl, '_blank', 'width=600,height=500');
+  };
+
+  // Facebook Messenger Share handler via official sharer endpoint
+  const handleMessengerShare = () => {
+    const url = encodeURIComponent(window.location.href);
+    const messengerUrl = `https://www.facebook.com/dialog/send?link=${url}&app_id=291494419107518&redirect_uri=${url}`;
+    const fallbackUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+    
+    const popup = window.open(messengerUrl, '_blank', 'width=600,height=500');
+    if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+      window.open(fallbackUrl, '_blank', 'width=600,height=500');
     }
   };
 
@@ -413,12 +468,44 @@ const ProductPage = () => {
                     </span>
                   )}
                   <div className="flex items-center gap-2">
+                    {/* Native / General Share Button */}
                     <button
                       onClick={handleShare}
                       className="p-2 rounded-full border border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors"
                       title="Share Product"
                     >
                       <Share2 size={18} className="text-slate-600 dark:text-slate-400" />
+                    </button>
+
+                    {/* Facebook Feed Share Button */}
+                    <button
+                      onClick={handleFacebookShare}
+                      className="p-2 rounded-full border border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors"
+                      title="Share to Facebook"
+                    >
+                      <svg 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        width="18" 
+                        height="18" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        strokeWidth="2" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        className="text-blue-600 dark:text-blue-400"
+                      >
+                        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+                      </svg>
+                    </button>
+
+                    {/* Facebook Messenger Share Button */}
+                    <button
+                      onClick={handleMessengerShare}
+                      className="p-2 rounded-full border border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors"
+                      title="Share to Facebook Messenger"
+                    >
+                      <MessageCircle size={18} className="text-sky-500 dark:text-sky-400" />
                     </button>
                   </div>
                 </div>
@@ -698,88 +785,10 @@ const ProductPage = () => {
                     <div className="space-y-3">
                       <div className="flex justify-between items-center text-sm">
                         <span>Overall Rating *</span>
-                        <StarRatingSelector rating={overallRating} setRating={setOverallRating} />
-                      </div>
-                      <div className="flex justify-between items-center text-sm">
-                        <span>Quality</span>
-                        <StarRatingSelector rating={qualityRating} setRating={setQualityRating} />
-                      </div>
-                      <div className="flex justify-between items-center text-sm">
-                        <span>Delivery</span>
-                        <StarRatingSelector rating={deliveryRating} setRating={setDeliveryRating} />
-                      </div>
-                      <div className="flex justify-between items-center text-sm">
-                        <span>Service</span>
-                        <StarRatingSelector rating={serviceRating} setRating={setServiceRating} />
                       </div>
                     </div>
                   </div>
                 </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <Label>Would you recommend this product to a friend?</Label>
-                    <div className="flex gap-4 mt-2">
-                      <label className="flex items-center gap-2 text-sm cursor-pointer">
-                        <input
-                          type="radio"
-                          name="recommend"
-                          value="Yes"
-                          checked={recommend === "Yes"}
-                          onChange={(e) => setRecommend(e.target.value)}
-                        />
-                        Yes
-                      </label>
-                      <label className="flex items-center gap-2 text-sm cursor-pointer">
-                        <input
-                          type="radio"
-                          name="recommend"
-                          value="No"
-                          checked={recommend === "No"}
-                          onChange={(e) => setRecommend(e.target.value)}
-                        />
-                        No
-                      </label>
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label>Review Title</Label>
-                    <Input
-                      placeholder="Summarize your review or highlight key features"
-                      value={reviewTitle}
-                      onChange={(e) => setReviewTitle(e.target.value)}
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Product Review</Label>
-                    <textarea
-                      placeholder="Tell us about your experience with this product: pros, cons, overall satisfaction"
-                      rows={4}
-                      value={reviewComment}
-                      onChange={(e) => setReviewComment(e.target.value)}
-                      className="w-full p-3 border rounded-md dark:bg-zinc-950 dark:border-zinc-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-3 border-t dark:border-zinc-800 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setShowReviewModal(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={reviewSubmitting}
-                  className="bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
-                >
-                  {reviewSubmitting ? <Loader className="animate-spin" /> : "Submit Review"}
-                </Button>
               </div>
             </form>
           </div>

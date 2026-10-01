@@ -29,20 +29,22 @@ const Navbar = () => {
     logoutUser(navigate, setTotalItem);
   };
 
-  // Fetch admin orders for notifications
+  // Fetch admin orders for notifications with explicit token header
   useEffect(() => {
     if (user && user.role === "admin") {
       const fetchAdminNotifications = async () => {
         try {
+          const token = localStorage.getItem("token");
+
           const { data } = await axios.get(`${server}/api/order/admin/all`, {
+            headers: {
+              token: token,
+            },
             withCredentials: true,
           });
           
           const orders = data.orders || data || [];
           setRecentOrders(orders);
-          
-          // Count unread or all orders depending on preference. 
-          // Here we take the total length or filter for new ones if a flag exists.
           setNotificationCount(orders.length);
         } catch (error) {
           console.log("Error fetching admin notifications:", error);
@@ -137,7 +139,7 @@ const Navbar = () => {
                         >
                           <div className="flex justify-between w-full font-medium text-xs">
                             <span className="text-zinc-900 dark:text-white">Order #{order._id.slice(-6)}</span>
-                            <span className="text-amber-600 font-semibold">Rs {order.total || order.totalPrice || 0}</span>
+                            <span className="text-amber-600 font-semibold">Rs {order.total || order.subTotal || 0}</span>
                           </div>
                           <span className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
                             Status: <span className="font-medium capitalize text-zinc-700 dark:text-zinc-300">{order.status || "Processing"}</span>

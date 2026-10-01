@@ -92,7 +92,8 @@ const OrdersPage = () => {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-7xl space-y-6">
+    <div className="container mx-auto py-6 sm:py-8 px-3 sm:px-4 max-w-7xl space-y-6">
+      {/* Header & Search */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">Manage Orders</h1>
@@ -110,13 +111,15 @@ const OrdersPage = () => {
         <Loading />
       ) : filteredOrders.length > 0 ? (
         <div className="space-y-4">
-          <div className="border border-slate-200 dark:border-zinc-800 rounded-2xl overflow-hidden bg-white dark:bg-zinc-950 shadow-sm">
+          {/* Desktop Table View */}
+          <div className="hidden md:block border border-slate-200 dark:border-zinc-800 rounded-2xl overflow-hidden bg-white dark:bg-zinc-950 shadow-sm">
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader className="bg-slate-50 dark:bg-zinc-900/50 border-b border-slate-200 dark:border-zinc-800">
                   <TableRow>
                     <TableHead className="font-semibold text-slate-700 dark:text-slate-300 py-4">Order ID</TableHead>
                     <TableHead className="font-semibold text-slate-700 dark:text-slate-300 py-4">User Email</TableHead>
+                    <TableHead className="font-semibold text-slate-700 dark:text-slate-300 py-4 min-w-[220px]">Address & Phone</TableHead>
                     <TableHead className="font-semibold text-slate-700 dark:text-slate-300 py-4">Total / Breakdown</TableHead>
                     <TableHead className="font-semibold text-slate-700 dark:text-slate-300 py-4">Payment Proof</TableHead>
                     <TableHead className="font-semibold text-slate-700 dark:text-slate-300 py-4">Status</TableHead>
@@ -127,15 +130,23 @@ const OrdersPage = () => {
                 <TableBody className="divide-y divide-slate-100 dark:divide-zinc-900">
                   {currentOrders.map((order) => (
                     <TableRow key={order._id} className="hover:bg-slate-50/50 dark:hover:bg-zinc-900/30 transition-colors">
-                      <TableCell className="font-medium">
+                      <TableCell className="font-medium align-top">
                         <Link to={`/order/${order._id}`} className="text-black dark:text-white font-semibold hover:underline">
                           {order._id.slice(-6).toUpperCase()}
                         </Link>
                       </TableCell>
-                      <TableCell className="text-slate-600 dark:text-slate-300 text-sm">
+                      <TableCell className="text-slate-600 dark:text-slate-300 text-sm align-top">
                         {order.user?.email || "N/A"}
                       </TableCell>
-                      <TableCell className="text-sm">
+                      <TableCell className="text-sm align-top min-w-[220px]">
+                        <p className="text-slate-900 dark:text-white font-medium text-xs leading-relaxed whitespace-normal break-words">
+                          {order.address || "No Address Provided"}
+                        </p>
+                        <p className="text-slate-500 dark:text-slate-400 text-xs mt-1">
+                          📞 {order.phone || "No Phone"}
+                        </p>
+                      </TableCell>
+                      <TableCell className="text-sm align-top">
                         <span className="font-semibold text-slate-900 dark:text-white">Rs {Number(order.subTotal).toFixed(2)}</span>
                         {order.paymentProof ? (
                           <span className="block text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-0.5">
@@ -147,7 +158,7 @@ const OrdersPage = () => {
                           </span>
                         )}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="align-top">
                         {order.paymentProof ? (
                           <a 
                             href={order.paymentProof} 
@@ -168,15 +179,15 @@ const OrdersPage = () => {
                           </span>
                         )}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="align-top">
                         <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getStatusBadgeStyle(order.status)}`}>
                           {order.status}
                         </span>
                       </TableCell>
-                      <TableCell className="text-slate-500 dark:text-slate-400 text-xs">
+                      <TableCell className="text-slate-500 dark:text-slate-400 text-xs align-top">
                         {moment(order.createdAt).format("DD MMM YYYY")}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="align-top">
                         <select
                           value={order.status}
                           className="w-[170px] px-3 py-1.5 border rounded-xl bg-white dark:bg-zinc-900 text-slate-900 dark:text-white border-slate-200 dark:border-zinc-800 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white transition-all cursor-pointer shadow-sm"
@@ -198,9 +209,105 @@ const OrdersPage = () => {
             </div>
           </div>
 
+          {/* Mobile Card Stack View */}
+          <div className="block md:hidden space-y-4">
+            {currentOrders.map((order) => (
+              <div 
+                key={order._id} 
+                className="border border-slate-200 dark:border-zinc-800 rounded-2xl p-4 bg-white dark:bg-zinc-950 shadow-sm space-y-3"
+              >
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-900 pb-3">
+                  <div>
+                    <Link to={`/order/${order._id}`} className="text-black dark:text-white font-bold text-sm hover:underline">
+                      #{order._id.slice(-6).toUpperCase()}
+                    </Link>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                      {moment(order.createdAt).format("DD MMM YYYY")}
+                    </p>
+                  </div>
+                  <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusBadgeStyle(order.status)}`}>
+                    {order.status}
+                  </span>
+                </div>
+
+                <div className="space-y-2 text-xs">
+                  <div>
+                    <span className="text-slate-400 dark:text-slate-500 font-medium">User Email:</span>
+                    <p className="text-slate-700 dark:text-slate-300 font-medium mt-0.5">{order.user?.email || "N/A"}</p>
+                  </div>
+
+                  <div>
+                    <span className="text-slate-400 dark:text-slate-500 font-medium">Address & Phone:</span>
+                    <p className="text-slate-900 dark:text-white font-medium mt-0.5 whitespace-normal break-words leading-relaxed">
+                      {order.address || "No Address Provided"}
+                    </p>
+                    <p className="text-slate-600 dark:text-slate-400 mt-1">📞 {order.phone || "No Phone"}</p>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-1">
+                    <div>
+                      <span className="text-slate-400 dark:text-slate-500 font-medium block">Total</span>
+                      <span className="font-bold text-slate-900 dark:text-white text-sm">
+                        Rs {Number(order.subTotal).toFixed(2)}
+                      </span>
+                      {order.paymentProof ? (
+                        <span className="block text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
+                          Due: Rs {(order.subTotal * 0.75).toFixed(2)}
+                        </span>
+                      ) : (
+                        <span className="block text-[10px] text-amber-600 dark:text-amber-400 font-medium">
+                          Full COD
+                        </span>
+                      )}
+                    </div>
+
+                    <div>
+                      <span className="text-slate-400 dark:text-slate-500 font-medium block mb-1">Payment Proof</span>
+                      {order.paymentProof ? (
+                        <a 
+                          href={order.paymentProof} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="block w-10 h-10"
+                        >
+                          <img 
+                            src={order.paymentProof} 
+                            alt="Payment Proof" 
+                            className="w-10 h-10 object-cover rounded-xl border border-slate-200 dark:border-zinc-800 shadow-sm" 
+                          />
+                        </a>
+                      ) : (
+                        <span className="text-slate-400 dark:text-slate-500 text-xs font-medium px-2 py-1 bg-slate-100 dark:bg-zinc-900 rounded-md">
+                          COD
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-slate-100 dark:border-zinc-900 flex items-center justify-between">
+                  <span className="text-xs text-slate-400 font-medium">Update Status:</span>
+                  <select
+                    value={order.status}
+                    className="w-[160px] px-3 py-1.5 border rounded-xl bg-white dark:bg-zinc-900 text-slate-900 dark:text-white border-slate-200 dark:border-zinc-800 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white transition-all cursor-pointer shadow-sm"
+                    onChange={(e) => updateOrderStatus(order._id, e.target.value)}
+                  >
+                    <option value="Pending">Pending</option>
+                    <option value="Awaiting Admin Approval">Awaiting Admin Approval</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Shipped">Shipped</option>
+                    <option value="Delivered">Delivered</option>
+                    <option value="Rejected by Seller">Rejected by Seller</option>
+                    <option value="Rejected by Buyer">Rejected by Buyer</option>
+                  </select>
+                </div>
+              </div>
+            ))}
+          </div>
+
           {/* Pagination Controls */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between pt-2 px-1">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 px-1">
               <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
                 Showing <span className="font-medium text-slate-900 dark:text-white">{indexOfFirstItem + 1}</span> to{" "}
                 <span className="font-medium text-slate-900 dark:text-white">

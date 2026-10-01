@@ -122,7 +122,6 @@ const Orders = () => {
           const isDelivered = statusLower === "delivered";
           const isShipped = statusLower === "shipped";
           
-          // Do not show the 25% proof upload if it's shipped, delivered, rejected, or already has proof
           const isCodWithoutProof = 
             order.method?.toLowerCase() === "cod" && 
             !order.paymentProof && 
@@ -174,7 +173,20 @@ const Orders = () => {
                     <span className="font-medium text-zinc-500 dark:text-zinc-400">SubTotal:</span>
                     <span className="text-zinc-900 dark:text-white font-semibold">Rs {Number(finalSubTotal).toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between">
+
+                  {/* Added Address */}
+                  <div className="pt-1 border-t border-zinc-100 dark:border-zinc-900">
+                    <span className="block font-medium text-zinc-500 dark:text-zinc-400 text-xs mb-0.5">Address:</span>
+                    <p className="text-zinc-900 dark:text-white font-medium text-xs leading-relaxed line-clamp-2">{order.address || "Not provided"}</p>
+                  </div>
+
+                  {/* Added Phone Number */}
+                  <div className="flex justify-between pt-1">
+                    <span className="font-medium text-zinc-500 dark:text-zinc-400">Phone:</span>
+                    <span className="text-zinc-900 dark:text-white font-medium">{order.phone || "Not provided"}</span>
+                  </div>
+
+                  <div className="flex justify-between pt-1 border-t border-zinc-100 dark:border-zinc-900">
                     <span className="font-medium text-zinc-500 dark:text-zinc-400">Placed At:</span>
                     <span className="text-zinc-900 dark:text-white font-medium">{formattedDate}</span>
                   </div>

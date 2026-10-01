@@ -132,6 +132,7 @@ const OrderPage = () => {
             <p style="margin: 6px 0;"><strong>Method:</strong> ${order.method.toUpperCase()}</p>
             <p style="margin: 6px 0;"><strong>Status:</strong> ${order.status}</p>
             <p style="margin: 6px 0;"><strong>Address:</strong> ${order.address}</p>
+            <p style="margin: 6px 0;"><strong>Phone:</strong> ${order.phone || "Not provided"}</p>
           </div>
 
           <div class="section">
@@ -247,6 +248,10 @@ const OrderPage = () => {
                 <div>
                   <span className="block font-medium text-slate-500 dark:text-slate-400 mb-1">Address:</span>
                   <p className="text-slate-900 dark:text-white font-medium leading-relaxed">{order.address}</p>
+                </div>
+                <div>
+                  <span className="block font-medium text-slate-500 dark:text-slate-400 mb-1">Phone Number:</span>
+                  <p className="text-slate-900 dark:text-white font-medium">{order.phone || "Not provided"}</p>
                 </div>
                 <div>
                   <span className="block font-medium text-slate-500 dark:text-slate-400 mb-1">User:</span>

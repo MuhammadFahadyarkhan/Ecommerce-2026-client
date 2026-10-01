@@ -1,4 +1,4 @@
-import { LogIn, ShoppingCart, User, Search, X, ArrowRight } from 'lucide-react';
+import { LogIn, ShoppingCart, User, Search, X, ArrowRight, Bell } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from './ui/dropdown-menu';
@@ -21,8 +21,45 @@ const Navbar = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
 
+  // Admin Notification States
+  const [recentOrders, setRecentOrders] = useState([]);
+  const [notificationCount, setNotificationCount] = useState(0);
+
   const logoutHandler = () => {
     logoutUser(navigate, setTotalItem);
+  };
+
+  // Fetch admin orders for notifications
+  useEffect(() => {
+    if (user && user.role === "admin") {
+      const fetchAdminNotifications = async () => {
+        try {
+          const { data } = await axios.get(`${server}/api/order/admin/all`, {
+            withCredentials: true,
+          });
+          
+          const orders = data.orders || data || [];
+          setRecentOrders(orders);
+          
+          // Count unread or all orders depending on preference. 
+          // Here we take the total length or filter for new ones if a flag exists.
+          setNotificationCount(orders.length);
+        } catch (error) {
+          console.log("Error fetching admin notifications:", error);
+        }
+      };
+
+      fetchAdminNotifications();
+
+      // Poll every 30 seconds for live order notifications
+      const interval = setInterval(fetchAdminNotifications, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [user]);
+
+  // Handler when admin opens the notification dropdown
+  const handleClearNotifications = () => {
+    setNotificationCount(0);
   };
 
   // Live product search effect with debounce
@@ -37,7 +74,6 @@ const Navbar = () => {
       setIsSearching(true);
       try {
         const { data } = await axios.get(`${server}/api/product/all?search=${encodeURIComponent(searchQuery)}`);
-        // Adjust based on your backend response structure (e.g. data.products or data)
         setSearchResults(data.products || data || []);
       } catch (error) {
         console.log("Error searching products:", error);
@@ -68,6 +104,54 @@ const Navbar = () => {
           </div>
 
           <ul className="flex items-center space-x-2 sm:space-x-4 mt-3 sm:mt-0">
+            {/* Admin Order Notification Dropdown */}
+            {user && user.role === "admin" && (
+              <li>
+                <DropdownMenu onOpenChange={(open) => { if (open) handleClearNotifications(); }}>
+                  <DropdownMenuTrigger asChild>
+                    <button 
+                      className="relative p-2.5 rounded-xl text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all duration-200 flex items-center justify-center outline-none"
+                      aria-label="Admin Notifications"
+                    >
+                      <Bell className="w-5 h-5" />
+                      {notificationCount > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-amber-600 text-white text-[10px] font-bold w-4.5 h-4.5 min-w-[18px] min-h-[18px] flex items-center justify-center rounded-full shadow-md animate-pulse">
+                          {notificationCount}
+                        </span>
+                      )}
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-xl p-2 w-80 max-h-96 overflow-y-auto">
+                    <DropdownMenuLabel className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase px-2 py-1.5 flex justify-between items-center">
+                      <span>Recent Orders</span>
+                      <span className="text-[10px] text-amber-600 cursor-pointer hover:underline" onClick={() => navigate("/admin/dashboard")}>Dashboard</span>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator className="bg-zinc-100 dark:bg-zinc-900 my-1" />
+                    
+                    {recentOrders.length > 0 ? (
+                      recentOrders.slice(0, 5).map((order) => (
+                        <DropdownMenuItem 
+                          key={order._id}
+                          onClick={() => navigate(`/order/${order._id}`)}
+                          className="flex flex-col items-start rounded-xl px-3 py-2 text-sm text-zinc-700 dark:text-zinc-300 focus:bg-zinc-100 dark:focus:bg-zinc-900 cursor-pointer mb-1"
+                        >
+                          <div className="flex justify-between w-full font-medium text-xs">
+                            <span className="text-zinc-900 dark:text-white">Order #{order._id.slice(-6)}</span>
+                            <span className="text-amber-600 font-semibold">Rs {order.total || order.totalPrice || 0}</span>
+                          </div>
+                          <span className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+                            Status: <span className="font-medium capitalize text-zinc-700 dark:text-zinc-300">{order.status || "Processing"}</span>
+                          </span>
+                        </DropdownMenuItem>
+                      ))
+                    ) : (
+                      <div className="text-center py-6 text-xs text-zinc-400">No recent orders found</div>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </li>
+            )}
+
             {/* Search Icon Button */}
             <li>
               <button 

@@ -45,15 +45,8 @@ const ProductPage = () => {
   }, [user]);
 
   const addToCartHandler = () => {
-    // If your CartContext supports multi-quantity object:
-    addToCart({ ...product, quantity });
-    
-    // OR if your CartContext adds 1 at a time and you want it to match the counter visually:
-    // for (let i = 0; i < quantity; i++) {
-    //   addToCart(product);
-    // }
-
-    toast.success(`Added ${quantity} item(s) to cart!`);
+    // Pass product and quantity separately to match your CartContext signature: addToCart(product, quantity)
+    addToCart(product, quantity);
   };
 
   const handleShare = async () => {
@@ -272,23 +265,6 @@ const ProductPage = () => {
     }
   };
 
-  const StarRatingSelector = ({ rating, setRating }) => {
-    return (
-      <div className="flex gap-1">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Star
-            key={star}
-            size={18}
-            className={`cursor-pointer transition-colors ${
-              star <= rating ? "fill-amber-400 text-amber-400" : "text-gray-300 dark:text-gray-600"
-            }`}
-            onClick={() => setRating(star)}
-          />
-        ))}
-      </div>
-    );
-  };
-
   const discountPercent = product?.discountPercent || product?.discount || 0;
   const hasDiscount = discountPercent > 0;
   const discountedPrice = hasDiscount 
@@ -437,7 +413,6 @@ const ProductPage = () => {
                     </span>
                   )}
                   <div className="flex items-center gap-2">
-                    {/* Heart wishlist button removed here */}
                     <button
                       onClick={handleShare}
                       className="p-2 rounded-full border border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors"
@@ -722,87 +697,91 @@ const ProductPage = () => {
                     <h4 className="text-xs font-bold tracking-wider uppercase text-slate-500 mb-3">My Rating</h4>
                     <div className="space-y-3">
                       <div className="flex justify-between items-center text-sm">
-                        <span className="text-slate-700 dark:text-slate-300">Overall Rating</span>
+                        <span>Overall Rating *</span>
                         <StarRatingSelector rating={overallRating} setRating={setOverallRating} />
                       </div>
                       <div className="flex justify-between items-center text-sm">
-                        <span className="text-slate-700 dark:text-slate-300">Quality</span>
+                        <span>Quality</span>
                         <StarRatingSelector rating={qualityRating} setRating={setQualityRating} />
                       </div>
                       <div className="flex justify-between items-center text-sm">
-                        <span className="text-slate-700 dark:text-slate-300">Delivery</span>
+                        <span>Delivery</span>
                         <StarRatingSelector rating={deliveryRating} setRating={setDeliveryRating} />
                       </div>
                       <div className="flex justify-between items-center text-sm">
-                        <span className="text-slate-700 dark:text-slate-300">Service</span>
+                        <span>Service</span>
                         <StarRatingSelector rating={serviceRating} setRating={setServiceRating} />
                       </div>
                     </div>
                   </div>
+                </div>
 
-                  <div className="pt-2">
-                    <p className="text-xs text-slate-600 dark:text-slate-400 mb-2">I would recommend this to a friend.</p>
-                    <div className="flex gap-6 text-sm">
-                      <label className="flex items-center gap-2 cursor-pointer">
+                <div className="space-y-4">
+                  <div>
+                    <Label>Would you recommend this product to a friend?</Label>
+                    <div className="flex gap-4 mt-2">
+                      <label className="flex items-center gap-2 text-sm cursor-pointer">
                         <input
                           type="radio"
                           name="recommend"
+                          value="Yes"
                           checked={recommend === "Yes"}
-                          onChange={() => setRecommend("Yes")}
+                          onChange={(e) => setRecommend(e.target.value)}
                         />
                         Yes
                       </label>
-                      <label className="flex items-center gap-2 cursor-pointer">
+                      <label className="flex items-center gap-2 text-sm cursor-pointer">
                         <input
                           type="radio"
                           name="recommend"
+                          value="No"
                           checked={recommend === "No"}
-                          onChange={() => setRecommend("No")}
+                          onChange={(e) => setRecommend(e.target.value)}
                         />
                         No
                       </label>
                     </div>
                   </div>
-                </div>
 
-                <div className="space-y-4 flex flex-col justify-between">
-                  <div className="space-y-4">
-                    <h4 className="text-xs font-bold tracking-wider uppercase text-slate-500">My Review (Optional)</h4>
+                  <div>
+                    <Label>Review Title</Label>
                     <Input
-                      placeholder="Review Title"
+                      placeholder="Summarize your review or highlight key features"
                       value={reviewTitle}
                       onChange={(e) => setReviewTitle(e.target.value)}
                     />
-                    <textarea
-                      placeholder="Write your review"
-                      rows={5}
-                      value={reviewComment}
-                      onChange={(e) => setReviewComment(e.target.value)}
-                      className="w-full p-3 text-sm border rounded-md dark:bg-zinc-950 dark:border-zinc-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
-                    ></textarea>
                   </div>
 
-                  <button
-                    type="submit"
-                    disabled={reviewSubmitting}
-                    className="w-full py-3 rounded-full bg-black hover:bg-zinc-800 text-white dark:bg-white dark:text-black dark:hover:bg-zinc-200 font-medium text-sm transition-colors shadow-sm mt-4 flex items-center justify-center"
-                  >
-                    {reviewSubmitting ? <Loader className="animate-spin h-5 w-5" /> : "Submit"}
-                  </button>
+                  <div>
+                    <Label>Product Review</Label>
+                    <textarea
+                      placeholder="Tell us about your experience with this product: pros, cons, overall satisfaction"
+                      rows={4}
+                      value={reviewComment}
+                      onChange={(e) => setReviewComment(e.target.value)}
+                      className="w-full p-3 border rounded-md dark:bg-zinc-950 dark:border-zinc-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+                    />
+                  </div>
                 </div>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
 
-      {relatedProduct?.length > 0 && (
-        <div className="mt-12">
-          <h2 className="text-xl font-bold mb-4">Related Products</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {relatedProduct.map((e) => (
-              <ProductCard key={e._id} product={e} />
-            ))}
+              <div className="flex justify-end gap-3 border-t dark:border-zinc-800 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowReviewModal(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={reviewSubmitting}
+                  className="bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+                >
+                  {reviewSubmitting ? <Loader className="animate-spin" /> : "Submit Review"}
+                </Button>
+              </div>
+            </form>
           </div>
         </div>
       )}

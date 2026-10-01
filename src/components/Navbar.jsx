@@ -29,12 +29,12 @@ const Navbar = () => {
     logoutUser(navigate, setTotalItem);
   };
 
-  // Fetch admin orders for notifications with explicit token header
+  // Fetch admin orders for notifications using the 'jwt' local storage key
   useEffect(() => {
     if (user && user.role === "admin") {
       const fetchAdminNotifications = async () => {
         try {
-          const token = localStorage.getItem("token");
+          const token = localStorage.getItem("jwt");
 
           const { data } = await axios.get(`${server}/api/order/admin/all`, {
             headers: {

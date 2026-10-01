@@ -17,6 +17,7 @@ import Payment from './pages/Payment'
 import Orders from './pages/Orders'
 import OrderPage from './pages/OrderPage'
 import AdminDashboard from './pages/AdminDashboard'
+import Policies from './pages/Policies'
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -42,6 +43,7 @@ function App() {
           <Navbar />
           <Routes>
             <Route path='/' element={<Home />} />
+            <Route path='/policies' element={<Policies />} />
             <Route path='/products' element={<Products />} />
             <Route path='/product/:id' element={<ProductPage />} />
             <Route path='/cart' element={isAuth ? <Cart /> : <Navigate to='/login' replace />} />

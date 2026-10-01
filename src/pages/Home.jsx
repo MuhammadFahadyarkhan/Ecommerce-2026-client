@@ -39,7 +39,7 @@ const Home = () => {
   };
 
   return (
-    <div className="w-full overflow-x-hidden">
+    <div className="w-full overflow-x-hidden bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 min-h-screen">
       <Hero navigate={navigate} />
 
       {/* Full-Width Floating Categories Bar */}
@@ -48,7 +48,7 @@ const Home = () => {
           {/* Left Arrow Button (Desktop only) */}
           <button 
             onClick={scrollLeft}
-            className="absolute -left-3 sm:-left-4 z-30 bg-white/90 dark:bg-zinc-900/90 hover:bg-white dark:hover:bg-zinc-900 text-zinc-800 dark:text-zinc-200 shadow-lg border border-zinc-200 dark:border-zinc-800 rounded-full p-2.5 hidden sm:flex items-center justify-center transition-all"
+            className="absolute -left-3 sm:-left-4 z-30 bg-white/90 dark:bg-zinc-800/90 hover:bg-white dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-200 shadow-lg border border-zinc-200 dark:border-zinc-700 rounded-full p-2.5 hidden sm:flex items-center justify-center transition-all"
             aria-label="Scroll left"
           >
             <ChevronLeft className="w-5 h-5" />
@@ -70,8 +70,8 @@ const Home = () => {
                     onClick={() => navigate(`/products?category=${encodeURIComponent(catName)}`)}
                     className="flex flex-col items-center flex-shrink-0 cursor-pointer group/item"
                   >
-                    {/* Circular Image Container (No harsh dark/black border) */}
-                    <div className="w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full border-2 border-white/80 dark:border-zinc-800/60 overflow-hidden bg-zinc-100 dark:bg-zinc-900 shadow-md transition-all duration-300 group-hover/item:scale-105 group-hover/item:shadow-xl flex items-center justify-center flex-shrink-0">
+                    {/* Circular Image Container */}
+                    <div className="w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full border-2 border-white/80 dark:border-zinc-700/60 overflow-hidden bg-zinc-100 dark:bg-zinc-800 shadow-md transition-all duration-300 group-hover/item:scale-105 group-hover/item:shadow-xl flex items-center justify-center flex-shrink-0">
                       {catImg ? (
                         <img
                           src={catImg}
@@ -99,7 +99,7 @@ const Home = () => {
           {/* Right Arrow Button (Desktop only) */}
           <button 
             onClick={scrollRight}
-            className="absolute -right-3 sm:-right-4 z-30 bg-white/90 dark:bg-zinc-900/90 hover:bg-white dark:hover:bg-zinc-900 text-zinc-800 dark:text-zinc-200 shadow-lg border border-zinc-200 dark:border-zinc-800 rounded-full p-2.5 hidden sm:flex items-center justify-center transition-all"
+            className="absolute -right-3 sm:-right-4 z-30 bg-white/90 dark:bg-zinc-800/90 hover:bg-white dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-200 shadow-lg border border-zinc-200 dark:border-zinc-700 rounded-full p-2.5 hidden sm:flex items-center justify-center transition-all"
             aria-label="Scroll right"
           >
             <ChevronRight className="w-5 h-5" />
@@ -111,7 +111,7 @@ const Home = () => {
       <div className="container mx-auto px-4 sm:px-6 py-6">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-500">Fresh Stock</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400">Fresh Stock</span>
             <h2 className="text-2xl sm:text-3xl font-serif font-bold tracking-tight text-zinc-900 dark:text-white mt-1">
               Latest Products
             </h2>
@@ -124,7 +124,6 @@ const Home = () => {
           </button>
         </div>
 
-        {/* 💡 Changed to grid-cols-2 for mobile screens */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
           {newProd && newProd.length > 0 ? (
             newProd.slice(0, 8).map((e) => {
@@ -138,38 +137,38 @@ const Home = () => {
 
       {/* Value Proposition / Trust Features Banner */}
       <div className="container mx-auto px-4 sm:px-6 my-16">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800/80 rounded-3xl p-8 shadow-sm">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/80 rounded-3xl p-8 shadow-sm">
           <div className="flex items-start gap-4">
-            <div className="p-3 rounded-2xl bg-white dark:bg-zinc-800 shadow-sm text-amber-600 dark:text-amber-400">
+            <div className="p-3 rounded-2xl bg-white dark:bg-zinc-700 shadow-sm text-amber-600 dark:text-amber-400">
               <Sparkles className="w-6 h-6" />
             </div>
             <div>
               <h3 className="font-semibold text-zinc-900 dark:text-white text-base">100% Pure & Authentic</h3>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">
+              <p className="text-sm text-zinc-500 dark:text-zinc-300 mt-1 leading-relaxed">
                 Sourced directly and ground fresh to retain maximum natural aroma and flavor.
               </p>
             </div>
           </div>
 
           <div className="flex items-start gap-4">
-            <div className="p-3 rounded-2xl bg-white dark:bg-zinc-800 shadow-sm text-amber-600 dark:text-amber-400">
+            <div className="p-3 rounded-2xl bg-white dark:bg-zinc-700 shadow-sm text-amber-600 dark:text-amber-400">
               <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
               <h3 className="font-semibold text-zinc-900 dark:text-white text-base">Secure Checkout</h3>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">
+              <p className="text-sm text-zinc-500 dark:text-zinc-300 mt-1 leading-relaxed">
                 Safe payment options and easy ordering for complete peace of mind.
               </p>
             </div>
           </div>
 
           <div className="flex items-start gap-4">
-            <div className="p-3 rounded-2xl bg-white dark:bg-zinc-800 shadow-sm text-amber-600 dark:text-amber-400">
+            <div className="p-3 rounded-2xl bg-white dark:bg-zinc-700 shadow-sm text-amber-600 dark:text-amber-400">
               <Truck className="w-6 h-6" />
             </div>
             <div>
               <h3 className="font-semibold text-zinc-900 dark:text-white text-base">Fast Doorstep Delivery</h3>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">
+              <p className="text-sm text-zinc-500 dark:text-zinc-300 mt-1 leading-relaxed">
                 Quick dispatch and careful packaging so your items arrive safely at your door.
               </p>
             </div>
@@ -181,7 +180,7 @@ const Home = () => {
       <div className="container mx-auto px-4 sm:px-6 py-6 mb-16">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-500">Explore Catalog</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400">Explore Catalog</span>
             <h2 className="text-2xl sm:text-3xl font-serif font-bold tracking-tight text-zinc-900 dark:text-white mt-1">
               Featured Spices & Goods
             </h2>
@@ -194,7 +193,6 @@ const Home = () => {
           </button>
         </div>
 
-        {/* 💡 Changed to grid-cols-2 for mobile screens */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
           {products && products.length > 0 ? (
             products.slice(0, 8).map((e) => {
@@ -208,7 +206,7 @@ const Home = () => {
 
       {/* Promotional CTA Banner */}
       <div className="container mx-auto px-4 sm:px-6 mb-16">
-        <div className="relative overflow-hidden rounded-3xl bg-zinc-900 dark:bg-zinc-900 text-white p-8 sm:p-12 shadow-xl border border-zinc-800">
+        <div className="relative overflow-hidden rounded-3xl bg-zinc-900 dark:bg-zinc-800 text-white p-8 sm:p-12 shadow-xl border border-zinc-800 dark:border-zinc-700">
           <div className="relative z-10 max-w-xl">
             <span className="text-xs font-semibold uppercase tracking-widest text-amber-400 bg-amber-400/10 px-3 py-1 rounded-full">
               Pure Quality Guaranteed

@@ -69,6 +69,12 @@ const Footer = () => {
                   >
                     Orders
                   </button>
+                   <button 
+                    onClick={() => navigate("/policies")} 
+                    className="px-3 py-1.5 rounded-xl hover:text-black dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all duration-200 cursor-pointer text-center md:text-left"
+                  >
+                    Policies
+                  </button>
                 </>
               )}
             </div>

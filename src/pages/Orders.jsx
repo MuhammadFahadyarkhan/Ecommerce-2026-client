@@ -84,7 +84,7 @@ const Orders = () => {
       case "rejected by buyer":
         return "text-rose-600 dark:text-rose-400";
       default:
-        return "text-slate-500 dark:text-slate-400";
+        return "text-zinc-500 dark:text-zinc-400";
     }
   };
 
@@ -94,11 +94,11 @@ const Orders = () => {
 
   if (orders.length === 0) {
     return (
-      <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-4">
-        <h1 className="text-2xl font-bold text-slate-700 dark:text-slate-300 mb-4">No Orders Yet</h1>
+      <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-4 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">
+        <h1 className="text-2xl font-bold text-zinc-700 dark:text-zinc-300 mb-4">No Orders Yet</h1>
         <Button 
           onClick={() => navigate("/products")}
-          className="bg-black hover:bg-zinc-800 text-white dark:bg-white dark:text-black dark:hover:bg-zinc-200 rounded-xl px-6"
+          className="bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200 rounded-xl px-6"
         >
           Shop Now
         </Button>
@@ -107,8 +107,8 @@ const Orders = () => {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4 min-h-[70vh] max-w-7xl">
-      <div className="text-3xl font-bold mb-8 text-center text-slate-900 dark:text-white tracking-tight">Your Orders</div>
+    <div className="container mx-auto py-8 px-4 sm:px-6 min-h-[70vh] max-w-7xl bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">
+      <div className="text-3xl font-bold mb-8 text-center text-zinc-900 dark:text-white tracking-tight">Your Orders</div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {orders.map((order) => {
@@ -117,14 +117,18 @@ const Orders = () => {
             date.getMonth() + 1
           ).padStart(2, "0")}/${date.getFullYear()}`;
 
-          const isRejected = order.status?.toLowerCase().includes("rejected");
-          const isDelivered = order.status?.toLowerCase() === "delivered";
+          const statusLower = order.status?.toLowerCase() || "";
+          const isRejected = statusLower.includes("rejected");
+          const isDelivered = statusLower === "delivered";
+          const isShipped = statusLower === "shipped";
           
+          // Do not show the 25% proof upload if it's shipped, delivered, rejected, or already has proof
           const isCodWithoutProof = 
             order.method?.toLowerCase() === "cod" && 
             !order.paymentProof && 
             !isRejected && 
-            !isDelivered;
+            !isDelivered && 
+            !isShipped;
 
           const computedSubTotal = order.items?.reduce((acc, item) => {
             const prod = item.product || item; 
@@ -143,52 +147,52 @@ const Orders = () => {
           return (
             <Card
               key={order._id}
-              className="border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm hover:shadow-md transition-all duration-200 p-6 rounded-2xl flex flex-col justify-between"
+              className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm hover:shadow-md transition-all duration-200 p-6 rounded-2xl flex flex-col justify-between"
             >
               <div>
-                <CardHeader className="p-0 pb-4 border-b border-slate-100 dark:border-zinc-900 mb-4">
-                  <CardTitle className="text-base font-semibold text-slate-900 dark:text-white">
+                <CardHeader className="p-0 pb-4 border-b border-zinc-100 dark:border-zinc-900 mb-4">
+                  <CardTitle className="text-base font-semibold text-zinc-900 dark:text-white">
                     Order #{order._id.toUpperCase()}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-0 space-y-2.5 text-sm text-slate-600 dark:text-slate-300">
+                <CardContent className="p-0 space-y-2.5 text-sm text-zinc-600 dark:text-zinc-300">
                   <div className="flex justify-between">
-                    <span className="font-medium text-slate-500 dark:text-slate-400">Method:</span>
-                    <span className="uppercase text-slate-900 dark:text-white font-medium">{order.method}</span>
+                    <span className="font-medium text-zinc-500 dark:text-zinc-400">Method:</span>
+                    <span className="uppercase text-zinc-900 dark:text-white font-medium">{order.method}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="font-medium text-slate-500 dark:text-slate-400">Status:</span>
-                    <span className={`font-semibold ${getStatusTextColor(order.status)}`}>
+                    <span className="font-medium text-zinc-500 dark:text-zinc-400">Status:</span>
+                    <span className={`font-semibold capitalize ${getStatusTextColor(order.status)}`}>
                       {order.status}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="font-medium text-slate-500 dark:text-slate-400">Total Items:</span>
-                    <span className="text-slate-900 dark:text-white font-medium">{order.items.length}</span>
+                    <span className="font-medium text-zinc-500 dark:text-zinc-400">Total Items:</span>
+                    <span className="text-zinc-900 dark:text-white font-medium">{order.items.length}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="font-medium text-slate-500 dark:text-slate-400">SubTotal:</span>
-                    <span className="text-slate-900 dark:text-white font-semibold">Rs {Number(finalSubTotal).toFixed(2)}</span>
+                    <span className="font-medium text-zinc-500 dark:text-zinc-400">SubTotal:</span>
+                    <span className="text-zinc-900 dark:text-white font-semibold">Rs {Number(finalSubTotal).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="font-medium text-slate-500 dark:text-slate-400">Placed At:</span>
-                    <span className="text-slate-900 dark:text-white font-medium">{formattedDate}</span>
+                    <span className="font-medium text-zinc-500 dark:text-zinc-400">Placed At:</span>
+                    <span className="text-zinc-900 dark:text-white font-medium">{formattedDate}</span>
                   </div>
 
                   {isCodWithoutProof && (
-                    <div className="mt-4 p-4 border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900/50 rounded-xl space-y-3">
-                      <p className="text-xs font-medium text-slate-700 dark:text-slate-300 leading-relaxed">
-                        Want 25% Advance? Transfer <strong className="text-slate-900 dark:text-white">Rs {advanceAmount}</strong> and upload screenshot:
+                    <div className="mt-4 p-4 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 rounded-xl space-y-3">
+                      <p className="text-xs font-medium text-zinc-700 dark:text-zinc-300 leading-relaxed">
+                        Want 25% Advance? Transfer <strong className="text-zinc-900 dark:text-white">Rs {advanceAmount}</strong> and upload screenshot:
                       </p>
                       <Input
                         type="file"
                         accept="image/*"
                         onChange={(e) => handleFileChange(order._id, e.target.files[0])}
-                        className="bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-xs h-9 cursor-pointer rounded-lg"
+                        className="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-xs h-9 cursor-pointer rounded-lg text-zinc-900 dark:text-white"
                       />
                       <Button
                         size="sm"
-                        className="w-full bg-black hover:bg-zinc-800 text-white dark:bg-white dark:text-black dark:hover:bg-zinc-200 rounded-xl font-medium text-xs h-9 transition-colors"
+                        className="w-full bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200 rounded-xl font-medium text-xs h-9 transition-colors"
                         disabled={uploadingId === order._id}
                         onClick={() => handleUploadProof(order._id)}
                       >
@@ -206,7 +210,7 @@ const Orders = () => {
               </div>
 
               <Button
-                className="mt-6 w-full bg-black hover:bg-zinc-800 text-white dark:bg-white dark:text-black dark:hover:bg-zinc-200 rounded-xl font-medium text-sm transition-colors"
+                className="mt-6 w-full bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200 rounded-xl font-medium text-sm transition-colors"
                 onClick={() => navigate(`/order/${order._id}`)}
               >
                 View Details

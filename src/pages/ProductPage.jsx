@@ -733,7 +733,7 @@ const ProductPage = () => {
       {/* Review Modal Pop-up */}
       {showReviewModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="bg-white dark:bg-zinc-950 border dark:border-zinc-800 w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden relative p-6 sm:p-8 my-8">
+          <div className="bg-white dark:bg-zinc-950 border dark:border-zinc-800 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden relative p-6 sm:p-8 my-8 max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setShowReviewModal(false)}
               className="absolute top-5 right-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
@@ -744,15 +744,19 @@ const ProductPage = () => {
             <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Product Reviews</h3>
 
             <form onSubmit={handleReviewSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-xs text-slate-500 mb-1 block">Your Name</Label>
                     <Input
                       placeholder="Enter your name"
                       value={reviewName}
                       onChange={(e) => setReviewName(e.target.value)}
                       required
                     />
+                  </div>
+                  <div>
+                    <Label className="text-xs text-slate-500 mb-1 block">Your Email</Label>
                     <Input
                       placeholder="Enter your email"
                       type="email"
@@ -761,34 +765,172 @@ const ProductPage = () => {
                       required
                     />
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <Input
-                        placeholder="Enter your nickname"
-                        value={reviewNickname}
-                        onChange={(e) => setReviewNickname(e.target.value)}
-                      />
-                      <p className="text-[10px] text-gray-400 mt-1">This name will be published with this review.</p>
-                    </div>
-                    <div>
-                      <Input
-                        placeholder="Enter your location"
-                        value={reviewLocation}
-                        onChange={(e) => setReviewLocation(e.target.value)}
-                      />
-                      <p className="text-[10px] text-gray-400 mt-1">Example: Karachi, Lahore, Islamabad.</p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-xs text-slate-500 mb-1 block">Nickname</Label>
+                    <Input
+                      placeholder="Enter your nickname"
+                      value={reviewNickname}
+                      onChange={(e) => setReviewNickname(e.target.value)}
+                    />
+                    <p className="text-[10px] text-gray-400 mt-1">This name will be published with this review.</p>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-slate-500 mb-1 block">Location</Label>
+                    <Input
+                      placeholder="Enter your location"
+                      value={reviewLocation}
+                      onChange={(e) => setReviewLocation(e.target.value)}
+                    />
+                    <p className="text-[10px] text-gray-400 mt-1">Example: Karachi, Lahore, Islamabad.</p>
+                  </div>
+                </div>
+
+                <div className="border-t dark:border-zinc-800 pt-4 mt-4 space-y-4">
+                  <h4 className="text-xs font-bold tracking-wider uppercase text-slate-500">My Rating</h4>
+
+                  {/* Overall Rating */}
+                  <div>
+                    <Label className="text-xs font-medium mb-1.5 block">Overall Rating *</Label>
+                    <div className="flex gap-2">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          type="button"
+                          key={star}
+                          onClick={() => setOverallRating(star)}
+                          className="focus:outline-none"
+                        >
+                          <Star
+                            size={24}
+                            className={
+                              star <= overallRating
+                                ? "fill-amber-400 text-amber-400"
+                                : "text-gray-300 dark:text-gray-700"
+                            }
+                          />
+                        </button>
+                      ))}
                     </div>
                   </div>
 
-                  <div className="border-t dark:border-zinc-800 pt-4 mt-2">
-                    <h4 className="text-xs font-bold tracking-wider uppercase text-slate-500 mb-3">My Rating</h4>
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center text-sm">
-                        <span>Overall Rating *</span>
-                      </div>
+                  {/* Quality Rating */}
+                  <div>
+                    <Label className="text-xs font-medium mb-1.5 block">Quality Rating</Label>
+                    <div className="flex gap-2">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          type="button"
+                          key={star}
+                          onClick={() => setQualityRating(star)}
+                          className="focus:outline-none"
+                        >
+                          <Star
+                            size={20}
+                            className={
+                              star <= qualityRating
+                                ? "fill-amber-400 text-amber-400"
+                                : "text-gray-300 dark:text-gray-700"
+                            }
+                          />
+                        </button>
+                      ))}
                     </div>
                   </div>
+
+                  {/* Delivery Rating */}
+                  <div>
+                    <Label className="text-xs font-medium mb-1.5 block">Delivery Rating</Label>
+                    <div className="flex gap-2">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          type="button"
+                          key={star}
+                          onClick={() => setDeliveryRating(star)}
+                          className="focus:outline-none"
+                        >
+                          <Star
+                            size={20}
+                            className={
+                              star <= deliveryRating
+                                ? "fill-amber-400 text-amber-400"
+                                : "text-gray-300 dark:text-gray-700"
+                            }
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Service Rating */}
+                  <div>
+                    <Label className="text-xs font-medium mb-1.5 block">Service Rating</Label>
+                    <div className="flex gap-2">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          type="button"
+                          key={star}
+                          onClick={() => setServiceRating(star)}
+                          className="focus:outline-none"
+                        >
+                          <Star
+                            size={20}
+                            className={
+                              star <= serviceRating
+                                ? "fill-amber-400 text-amber-400"
+                                : "text-gray-300 dark:text-gray-700"
+                            }
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Recommend Option */}
+                  <div>
+                    <Label className="text-xs font-medium mb-1.5 block">Would you recommend this product?</Label>
+                    <select
+                      value={recommend}
+                      onChange={(e) => setRecommend(e.target.value)}
+                      className="w-full p-2 border rounded-md text-sm dark:bg-zinc-950 dark:border-zinc-800 dark:text-white"
+                    >
+                      <option value="Yes">Yes</option>
+                      <option value="No">No</option>
+                    </select>
+                  </div>
+
+                  {/* Review Title */}
+                  <div>
+                    <Label className="text-xs font-medium mb-1.5 block">Review Title</Label>
+                    <Input
+                      placeholder="Summarize your review or highlight a key feature"
+                      value={reviewTitle}
+                      onChange={(e) => setReviewTitle(e.target.value)}
+                    />
+                  </div>
+
+                  {/* Review Comment */}
+                  <div>
+                    <Label className="text-xs font-medium mb-1.5 block">Review Comment</Label>
+                    <textarea
+                      placeholder="Write your detailed review here..."
+                      rows={4}
+                      value={reviewComment}
+                      onChange={(e) => setReviewComment(e.target.value)}
+                      className="w-full p-3 border rounded-md text-sm dark:bg-zinc-950 dark:border-zinc-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-slate-400"
+                    />
+                  </div>
                 </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t dark:border-zinc-800">
+                <Button type="button" variant="outline" onClick={() => setShowReviewModal(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={reviewSubmitting} className="bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200">
+                  {reviewSubmitting ? <Loader className="animate-spin h-4 w-4" /> : "Submit Review"}
+                </Button>
               </div>
             </form>
           </div>

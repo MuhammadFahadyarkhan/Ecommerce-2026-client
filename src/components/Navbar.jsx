@@ -8,6 +8,7 @@ import { UserData } from "@/context/UserContext";
 import { CartData } from '@/context/CartContext';
 import axios from 'axios';
 import { server } from '@/main';
+import Cookies from 'js-cookie';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -29,12 +30,24 @@ const Navbar = () => {
     logoutUser(navigate, setTotalItem);
   };
 
-  // Fetch admin orders for notifications using the 'jwt' local storage key
+  // Helper function to safely get auth token from cookies or localStorage fallback
+  const getAuthToken = () => {
+    return (
+      Cookies.get("token") ||
+      Cookies.get("jwt") ||
+      localStorage.getItem("token") ||
+      localStorage.getItem("jwt") ||
+      localStorage.getItem("authToken")
+    );
+  };
+
+  // Fetch admin orders and calculate only new/unread notifications
   useEffect(() => {
     if (user && user.role === "admin") {
       const fetchAdminNotifications = async () => {
         try {
-          const token = localStorage.getItem("jwt");
+          const token = getAuthToken();
+          if (!token) return;
 
           const { data } = await axios.get(`${server}/api/order/admin/all`, {
             headers: {
@@ -45,7 +58,17 @@ const Navbar = () => {
           
           const orders = data.orders || data || [];
           setRecentOrders(orders);
-          setNotificationCount(orders.length);
+
+          // Track only new orders since the last time notifications were cleared
+          const storedLastSeen = localStorage.getItem("lastSeenOrderCount");
+          if (storedLastSeen === null) {
+            localStorage.setItem("lastSeenOrderCount", orders.length.toString());
+            setNotificationCount(0);
+          } else {
+            const lastSeenCount = Number(storedLastSeen);
+            const newOrdersCount = Math.max(0, orders.length - lastSeenCount);
+            setNotificationCount(newOrdersCount);
+          }
         } catch (error) {
           console.log("Error fetching admin notifications:", error);
         }
@@ -59,9 +82,10 @@ const Navbar = () => {
     }
   }, [user]);
 
-  // Handler when admin opens the notification dropdown
+  // Handler when admin opens the notification dropdown (resets count to 0)
   const handleClearNotifications = () => {
     setNotificationCount(0);
+    localStorage.setItem("lastSeenOrderCount", recentOrders.length.toString());
   };
 
   // Live product search effect with debounce

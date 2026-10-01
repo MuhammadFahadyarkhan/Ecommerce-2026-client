@@ -142,7 +142,7 @@ const Products = () => {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 p-4 md:p-6 flex flex-col justify-between overflow-x-hidden">
+      <div className="flex-1 p-2 sm:p-6 flex flex-col justify-between overflow-x-hidden">
         <div>
           <button
             onClick={() => setShow(true)}
@@ -154,7 +154,8 @@ const Products = () => {
           {loading ? (
             <Loading />
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            /* 💡 Changed to grid-cols-2 for mobile screens */
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
               {products && products.length > 0 ? (
                 products.map((e) => (
                   <ProductCard key={e._id} product={e} latest={"no"} />

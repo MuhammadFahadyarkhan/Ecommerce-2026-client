@@ -124,7 +124,8 @@ const Home = () => {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        {/* 💡 Changed to grid-cols-2 for mobile screens */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
           {newProd && newProd.length > 0 ? (
             newProd.slice(0, 8).map((e) => {
               return <ProductCard key={e._id} product={e} latest={"yes"} />;
@@ -193,7 +194,8 @@ const Home = () => {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        {/* 💡 Changed to grid-cols-2 for mobile screens */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
           {products && products.length > 0 ? (
             products.slice(0, 8).map((e) => {
               return <ProductCard key={e._id} product={e} />;

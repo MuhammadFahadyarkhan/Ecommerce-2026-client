@@ -169,7 +169,7 @@ const HomePage = () => {
                 <label className="text-sm font-medium">Category</label>
                 <select
                   name="categorySelect"
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 bg-background text-foreground dark:bg-zinc-950 dark:text-zinc-50"
+                  className="flex h-9 w-full rounded-md border border-input px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 bg-background text-foreground dark:bg-zinc-950 dark:text-zinc-50"
                   onChange={handleChange}
                   value={isNewCategory ? "add_new_custom" : formData.category}
                   required
@@ -245,13 +245,14 @@ const HomePage = () => {
       {loading ? (
         <Loading />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        /* 💡 Updated grid columns to 2 on mobile and 4 on desktop with compact gap */
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
           {products && products.length > 0 ? (
             products.map((e) => {
               return <ProductCard product={e} key={e._id} latest={"no"} />;
             })
           ) : (
-            <p>NO Products yet</p>
+            <p className="col-span-full text-center text-zinc-500 py-10">NO Products yet</p>
           )}
         </div>
       )}

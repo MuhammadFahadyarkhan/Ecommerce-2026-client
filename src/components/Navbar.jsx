@@ -11,7 +11,7 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   const { isAuth, logoutUser, user } = UserData();
-  const { totalItem } = CartData();
+  const { totalItem, setTotalItem } = CartData(); // 👈 Fixed: Added setTotalItem here
 
   const logoutHandler = () => {
     logoutUser(navigate, setTotalItem);

@@ -57,23 +57,25 @@ export const CartProvider = ({ children }) => {
     }
   }
 
-  async function updateCart(action, id){
+  async function updateCart(action, id) {
     const token = Cookies.get("token");
     try {
-      const {data} = await axios.post(`${server}/api/cart/update?action=${action}`, {id},
+      const { data } = await axios.post(
+        `${server}/api/cart/update?action=${action}`, 
+        { id },
         {
-          headers:{
+          headers: {
              token,
           }
         }
       );
       fetchCart();
     } catch (error) {
-      toast.error(error.response?.data?.message);
+      toast.error(error.response?.data?.message || "Failed to update cart");
     }
   }
 
-  async function removeFromCart(id){
+  async function removeFromCart(id) {
     const token = Cookies.get("token");
     try {
       const { data } = await axios.get(
@@ -87,16 +89,27 @@ export const CartProvider = ({ children }) => {
       toast.success(data.message);
       fetchCart();
     } catch (error) {
-      toast.error(error.response?.data?.message);
+      toast.error(error.response?.data?.message || "Failed to remove item");
     }
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchCart();
   }, []);
 
   return (
-    <CartContext.Provider value={{ cart, fetchCart, totalItem, subTotal, addToCart, setTotalItem, updateCart, removeFromCart }}>
+    <CartContext.Provider 
+      value={{ 
+        cart, 
+        fetchCart, 
+        totalItem, 
+        subTotal, 
+        addToCart, 
+        setTotalItem, 
+        updateCart, 
+        removeFromCart 
+      }}
+    >
       {children}
     </CartContext.Provider>
   );
